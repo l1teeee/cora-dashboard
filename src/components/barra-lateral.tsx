@@ -3,6 +3,7 @@
 import {
   LayoutDashboardIcon,
   PhoneCallIcon,
+  HeadsetIcon,
   ContactRoundIcon,
   BotIcon,
   ScrollTextIcon,
@@ -24,6 +25,7 @@ const GRUPOS: { titulo?: string; items: (ItemNav & { soloAdmin?: boolean })[] }[
   {
     items: [
       { href: "/dashboard", etiqueta: "Dashboard", icon: LayoutDashboardIcon },
+      { href: "/dashboard/recepcion", etiqueta: "Recepcion", icon: HeadsetIcon },
       { href: "/dashboard/llamadas", etiqueta: "Llamadas", icon: PhoneCallIcon },
     ],
   },
