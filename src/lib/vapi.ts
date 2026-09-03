@@ -1,4 +1,12 @@
 import 'server-only'
+
+// El backend en Railway llama a esta misma clave VAPI_API_KEY. Se aceptan los dos nombres para
+// que no haya que recordar cual usa cada proyecto: es el mismo valor, la private key de Vapi.
+const FALTA_CLAVE = 'Falta la private key de Vapi: define VAPI_PRIVATE_KEY (o VAPI_API_KEY)'
+
+function claveVapi(): string | undefined {
+  return process.env.VAPI_PRIVATE_KEY ?? process.env.VAPI_API_KEY
+}
 // VAPI_PRIVATE_KEY nunca puede llegar al bundle del cliente: este import hace que el
 // build falle si algun Client Component importa este modulo por error.
 
@@ -29,8 +37,8 @@ export type AsistenteConfig = { id: string; nombre: string; firstMessage: string
 export type ArchivoKb = { id: string; nombre: string; tamano: number | null; creado: string | null }
 
 async function pedirVapi<T = unknown>(ruta: string, init?: RequestInit): Promise<T> {
-  const clavePrivada = process.env.VAPI_PRIVATE_KEY
-  if (!clavePrivada) throw new Error('Falta la variable de entorno VAPI_PRIVATE_KEY')
+  const clavePrivada = claveVapi()
+  if (!clavePrivada) throw new Error(FALTA_CLAVE)
 
   const headers = new Headers(init?.headers)
   headers.set('Authorization', `Bearer ${clavePrivada}`)
@@ -131,9 +139,9 @@ function mapearArchivo(a: VapiFile): ArchivoKb {
 // accesible. Este endpoint responde 302 hacia una URL firmada de vida corta, asi que hay que
 // interceptar el redirect (redirect: 'manual') en vez de dejar que fetch lo siga.
 export async function obtenerUrlGrabacion(callId: string): Promise<string | null> {
-  const apiKey = process.env.VAPI_PRIVATE_KEY
+  const apiKey = claveVapi()
 
-  if (!apiKey) throw new Error('Falta la variable de entorno VAPI_PRIVATE_KEY')
+  if (!apiKey) throw new Error(FALTA_CLAVE)
 
   const res = await fetch(`https://api.vapi.ai/call/${encodeURIComponent(callId)}/stereo-recording`, {
     headers: { Authorization: `Bearer ${apiKey}` },
