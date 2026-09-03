@@ -63,6 +63,54 @@ src/
 `filtrarPorRol` vive en un solo sitio y la usan tanto la pagina como la API: asi el filtro de
 seguridad no puede divergir entre las dos rutas de acceso a los datos.
 
+## Administracion del asistente (solo admin)
+
+Tres funciones adicionales, todas restringidas al rol admin **en el servidor**. Un agente que
+entre por la URL directa recibe 403, no un redirect: las API routes responden
+`403 { error: 'Solo administradores' }` y las paginas renderizan una tarjeta de acceso denegado.
+Ocultar el enlace del menu no es una medida de seguridad, solo de ergonomia.
+
+### `/dashboard/asistente`
+
+Lee la configuracion actual del asistente de Vapi y permite editar nombre, primer mensaje y
+system prompt. El boton de guardar esta deshabilitado si no hay cambios, y antes de aplicar abre
+un dialogo que lista campo por campo el valor anterior y el nuevo.
+
+Debajo, la base de conocimiento: subida de PDF, DOCX o TXT (maximo 300 KB), listado con nombre,
+tamaño y fecha, y borrado con confirmacion. La validacion de tipo y tamaño se hace en el cliente
+para evitar el viaje y **se repite en el servidor**, que es donde cuenta.
+
+Al subir un archivo se inyecta en el system prompt una instruccion recordando al asistente que
+consulte la base de conocimiento. Va delimitada entre marcadores `cora:kb` y se reemplaza, no se
+concatena: si se concatenara, cada subida añadiria otra copia hasta llenar el prompt de lineas
+identicas. El formulario muestra el prompt sin ese bloque, para que el admin edite solo lo suyo.
+
+### `/dashboard/auditoria`
+
+Historial de cambios ordenado por fecha descendente, con filtro por tipo de accion. Cada
+operacion de las dos secciones anteriores escribe aqui un registro con usuario, accion, detalle
+de que cambio y fecha.
+
+La tabla vive en el backend de Railway, no en el dashboard: ese backend ya es el unico componente
+que habla con MySQL. Meter acceso a base en funciones serverless significaria credenciales de base
+en Vercel y una conexion nueva por invocacion, que agota `max_connections` al no haber pooler.
+
+```sql
+CREATE TABLE IF NOT EXISTS auditoria (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  usuario VARCHAR(120) NOT NULL,
+  accion VARCHAR(60) NOT NULL,
+  detalle JSON NULL,
+  fecha TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_fecha (fecha),
+  KEY idx_accion (accion)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+Si el registro de auditoria falla, la operacion en Vapi **ya ocurrio** y no se puede deshacer. La
+API devuelve `auditoriaRegistrada: false` y la UI lo avisa en ambar, en vez de reportar un fallo
+que haria creer al admin que su cambio no se aplico.
+
 ## Variables de entorno
 
 | Variable | Que es |
@@ -72,6 +120,8 @@ seguridad no puede divergir entre las dos rutas de acceso a los datos.
 | `NEXTAUTH_SECRET` | Firma la sesion. Genera uno con `openssl rand -base64 32` |
 | `ADMIN_USUARIO` / `ADMIN_PASSWORD` | Credenciales del admin |
 | `AGENTE_USUARIO` / `AGENTE_PASSWORD` | Credenciales del agente. El usuario debe coincidir con `usuario_asignado` |
+| `VAPI_PRIVATE_KEY` | Vapi -> Organization Settings -> API Keys -> **Private Key**. Da control total sobre el asistente: solo servidor |
+| `VAPI_ASSISTANT_ID` | Opcional. Si falta, se usa el primer asistente que devuelva `GET /assistant` |
 
 Ninguna lleva `NEXT_PUBLIC_`.
 

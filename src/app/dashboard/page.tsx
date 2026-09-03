@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BotonLogout } from "@/components/boton-logout";
+import { NavAdmin } from "@/components/nav-admin";
 import { FiltroFecha } from "@/components/filtro-fecha";
 import { TablaLlamadas } from "@/components/tabla-llamadas";
 import { TarjetasResumen } from "@/components/tarjetas-resumen";
@@ -54,6 +55,8 @@ export default async function Page({
             <BotonLogout />
           </div>
         </header>
+
+        {sesion.user.rol === "admin" && <NavAdmin />}
 
         <main className="mt-8 space-y-6">
           {error ? (
