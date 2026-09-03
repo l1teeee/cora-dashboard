@@ -20,6 +20,7 @@ import {
   type ItemNav,
 } from "@/components/ui/sidebar";
 import { MenuUsuario } from "@/components/menu-usuario";
+import { LogoCora } from "@/components/logo-cora";
 
 const GRUPOS: { titulo?: string; items: (ItemNav & { soloAdmin?: boolean })[] }[] = [
   {
@@ -63,8 +64,8 @@ export function BarraLateral({
   return (
     <Sidebar colapsada={colapsada} abiertaMovil={abiertaMovil} onCerrarMovil={onCerrarMovil}>
       <SidebarHeader>
-        <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-sidebar-primary text-xs font-bold text-sidebar-primary-foreground shadow-[0_2px_8px_rgb(0_0_0_/_0.18)]">
-          C
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-sidebar-primary text-sidebar-primary-foreground shadow-[0_2px_8px_rgb(0_0_0_/_0.18)]">
+          <LogoCora className="size-5" />
         </div>
         {!colapsada && (
           <div className="flex flex-col">
