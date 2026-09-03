@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import type { Rol } from "@/lib/tipos";
 import { BarraLateral } from "@/components/barra-lateral";
 import { BarraSuperior } from "@/components/barra-superior";
+import { TransicionSeccion } from "@/components/transicion-seccion";
 
 const CLAVE_COLAPSADA = "cora-lateral-colapsada";
 
@@ -58,7 +59,9 @@ export function ShellDashboard({
             onAbrirMovil={() => setAbiertaMovil(true)}
           />
           <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-9">
-            <div className="mx-auto w-full max-w-7xl space-y-7">{children}</div>
+            <TransicionSeccion className="mx-auto w-full max-w-7xl space-y-7">
+              {children}
+            </TransicionSeccion>
           </main>
         </div>
       </div>

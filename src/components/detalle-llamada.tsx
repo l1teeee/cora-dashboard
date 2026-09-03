@@ -42,6 +42,7 @@ export function DetalleLlamada({
 }) {
   const [estado, setEstado] = useState<Estado>({ tipo: "cargando" });
   const [fichaAbierta, setFichaAbierta] = useState(false);
+  const [transcripcionAbierta, setTranscripcionAbierta] = useState(false);
 
   useEffect(() => {
     if (!callId) return;
@@ -50,6 +51,7 @@ export function DetalleLlamada({
     let cancelado = false;
     setEstado({ tipo: "cargando" });
     setFichaAbierta(false);
+    setTranscripcionAbierta(false);
 
     fetch(`/api/llamadas/${encodeURIComponent(callId)}`)
       .then(async (respuesta) => {
@@ -80,16 +82,18 @@ export function DetalleLlamada({
   }, [callId]);
 
   const telefono = estado.tipo === "listo" ? estado.datos.numero_telefono : null;
+  const transcripcion = estado.tipo === "listo" ? estado.datos.transcripcion : null;
+  const hayOtroDialogo = fichaAbierta || transcripcionAbierta;
 
   return (
     <>
-      {/* Al abrir el historial este dialogo se cierra en vez de quedar detras: dos modales
-          apilados se leen como un error. El componente sigue montado, asi que los datos
-          ya cargados siguen ahi cuando el historial se cierra y este vuelve. */}
+      {/* Al abrir el historial o la transcripcion completa este dialogo se cierra en vez de
+          quedar detras: dos modales apilados se leen como un error. El componente sigue
+          montado, asi que los datos ya cargados siguen ahi cuando el otro se cierra. */}
       <Dialog
-        open={callId !== null && !fichaAbierta}
+        open={callId !== null && !hayOtroDialogo}
         onOpenChange={(open) => {
-          if (!open && !fichaAbierta) onClose();
+          if (!open && !hayOtroDialogo) onClose();
         }}
       >
         <DialogContent className="flex max-h-[88vh] flex-col gap-0 p-0 sm:max-w-3xl">
@@ -119,6 +123,7 @@ export function DetalleLlamada({
             <DetalleContenido
               datos={estado.datos}
               onVerContacto={() => setFichaAbierta(true)}
+              onVerTranscripcion={() => setTranscripcionAbierta(true)}
             />
           )}
         </DialogContent>
@@ -127,6 +132,13 @@ export function DetalleLlamada({
       {fichaAbierta && (
         <FichaContacto telefono={telefono} onClose={() => setFichaAbierta(false)} />
       )}
+
+      {transcripcionAbierta && transcripcion && (
+        <TranscripcionCompleta
+          texto={transcripcion}
+          onClose={() => setTranscripcionAbierta(false)}
+        />
+      )}
     </>
   );
 }
@@ -134,9 +146,11 @@ export function DetalleLlamada({
 function DetalleContenido({
   datos,
   onVerContacto,
+  onVerTranscripcion,
 }: {
   datos: LlamadaDetalle;
   onVerContacto: () => void;
+  onVerTranscripcion: () => void;
 }) {
   const raiz = useRef<HTMLDivElement>(null);
   const finalizacion = describirFinalizacion(datos.razon_finalizacion);
@@ -217,7 +231,7 @@ function DetalleContenido({
 
         <Bloque titulo="Transcripcion">
           {datos.transcripcion ? (
-            <Transcripcion texto={datos.transcripcion} />
+            <Transcripcion texto={datos.transcripcion} onVerCompleta={onVerTranscripcion} />
           ) : (
             <p className="text-sm text-muted-foreground">Sin transcripcion</p>
           )}
@@ -251,9 +265,7 @@ function Bloque({ titulo, children }: { titulo: string; children: React.ReactNod
 
 const LINEAS_VISTA_PREVIA = 4;
 
-function Transcripcion({ texto }: { texto: string }) {
-  const [completaAbierta, setCompletaAbierta] = useState(false);
-
+function Transcripcion({ texto, onVerCompleta }: { texto: string; onVerCompleta: () => void }) {
   const lineas = texto.split("\n");
   const hayMas = lineas.length > LINEAS_VISTA_PREVIA;
 
@@ -266,7 +278,7 @@ function Transcripcion({ texto }: { texto: string }) {
 
       {hayMas && (
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => setCompletaAbierta(true)}>
+          <Button variant="outline" size="sm" onClick={onVerCompleta}>
             <MaximizeIcon strokeWidth={1.75} />
             Leer toda la transcripcion
           </Button>
@@ -275,20 +287,28 @@ function Transcripcion({ texto }: { texto: string }) {
           </span>
         </div>
       )}
-
-      <Dialog open={completaAbierta} onOpenChange={setCompletaAbierta}>
-        <DialogContent className="flex max-h-[85vh] flex-col sm:max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Transcripcion completa</DialogTitle>
-            <DialogDescription>
-              {lineas.length} intervenciones entre el asistente y la persona que llamo.
-            </DialogDescription>
-          </DialogHeader>
-
-          <LineasTranscripcion lineas={lineas} className="min-h-0 flex-1 overflow-y-auto" />
-        </DialogContent>
-      </Dialog>
     </div>
+  );
+}
+
+// Vive fuera del dialogo de detalle, no anidada dentro: montada aqui el detalle puede
+// cerrarse mientras esta abierta, en lugar de quedar visible por debajo.
+function TranscripcionCompleta({ texto, onClose }: { texto: string; onClose: () => void }) {
+  const lineas = texto.split("\n");
+
+  return (
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="flex max-h-[85vh] flex-col sm:max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>Transcripcion completa</DialogTitle>
+          <DialogDescription>
+            {lineas.length} intervenciones entre el asistente y la persona que llamo.
+          </DialogDescription>
+        </DialogHeader>
+
+        <LineasTranscripcion lineas={lineas} className="min-h-0 flex-1 overflow-y-auto" />
+      </DialogContent>
+    </Dialog>
   );
 }
 

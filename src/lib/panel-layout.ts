@@ -168,7 +168,10 @@ export function actualizarLayout(
 }
 
 export const PANEL_ADMIN: DefinicionPanel = {
-  clave: 'cora-dashboard:layout-admin:v1',
+  // v2: las tarjetas de cifra pasaron de 4 a 5 filas. Con 4 no cabia la grafica y quedaba
+  // recortada contra el borde inferior, asi que un layout guardado con la altura vieja
+  // reproduciria el mismo defecto; subir la version lo descarta y aplica el nuevo default.
+  clave: 'cora-dashboard:layout-admin:v2',
   etiquetas: {
     total: 'Total de llamadas',
     exito: 'Tasa de exito',
@@ -185,13 +188,13 @@ export const PANEL_ADMIN: DefinicionPanel = {
   // Los minimos dejan al menos dos pasos de reduccion desde la vista inicial, para
   // que cada tarjeta se pueda ensanchar, estrechar, alargar y acortar de verdad.
   layout: [
-    { i: 'total', x: 0, y: 0, w: 6, h: 4, minW: 3, minH: 3, maxW: 12, maxH: 12 },
-    { i: 'exito', x: 6, y: 0, w: 3, h: 4, minW: 3, minH: 3, maxW: 12, maxH: 12 },
-    { i: 'duracion', x: 9, y: 0, w: 3, h: 4, minW: 3, minH: 3, maxW: 12, maxH: 12 },
-    { i: 'costo', x: 0, y: 5, w: 3, h: 4, minW: 3, minH: 3, maxW: 12, maxH: 12 },
-    { i: 'transferencias', x: 3, y: 5, w: 3, h: 4, minW: 3, minH: 3, maxW: 12, maxH: 12 },
-    { i: 'sin-asignar', x: 6, y: 5, w: 3, h: 4, minW: 3, minH: 3, maxW: 12, maxH: 12 },
-    { i: 'recurrentes', x: 9, y: 5, w: 3, h: 4, minW: 3, minH: 3, maxW: 12, maxH: 12 },
+    { i: 'total', x: 0, y: 0, w: 6, h: 5, minW: 3, minH: 4, maxW: 12, maxH: 12 },
+    { i: 'exito', x: 6, y: 0, w: 3, h: 5, minW: 3, minH: 4, maxW: 12, maxH: 12 },
+    { i: 'duracion', x: 9, y: 0, w: 3, h: 5, minW: 3, minH: 4, maxW: 12, maxH: 12 },
+    { i: 'costo', x: 0, y: 5, w: 3, h: 5, minW: 3, minH: 4, maxW: 12, maxH: 12 },
+    { i: 'transferencias', x: 3, y: 5, w: 3, h: 5, minW: 3, minH: 4, maxW: 12, maxH: 12 },
+    { i: 'sin-asignar', x: 6, y: 5, w: 3, h: 5, minW: 3, minH: 4, maxW: 12, maxH: 12 },
+    { i: 'recurrentes', x: 9, y: 5, w: 3, h: 5, minW: 3, minH: 4, maxW: 12, maxH: 12 },
     { i: 'por-hora', x: 0, y: 10, w: 8, h: 10, minW: 4, minH: 7, maxW: 12, maxH: 20 },
     { i: 'carga', x: 8, y: 10, w: 4, h: 10, minW: 3, minH: 7, maxW: 12, maxH: 20 },
     { i: 'finalizacion', x: 0, y: 20, w: 12, h: 12, minW: 4, minH: 7, maxW: 12, maxH: 24 },
@@ -200,7 +203,7 @@ export const PANEL_ADMIN: DefinicionPanel = {
 }
 
 export const PANEL_AGENTE: DefinicionPanel = {
-  clave: 'cora-dashboard:layout-agente:v1',
+  clave: 'cora-dashboard:layout-agente:v2',
   etiquetas: {
     mias: 'Mis llamadas',
     seguimiento: 'Pendientes de seguimiento',
@@ -212,12 +215,12 @@ export const PANEL_AGENTE: DefinicionPanel = {
     recientes: 'Mis llamadas recientes',
   },
   layout: [
-    { i: 'mias', x: 0, y: 0, w: 6, h: 4, minW: 3, minH: 3, maxW: 12, maxH: 12 },
-    { i: 'seguimiento', x: 6, y: 0, w: 6, h: 4, minW: 3, minH: 3, maxW: 12, maxH: 12 },
-    { i: 'quejas', x: 0, y: 5, w: 3, h: 4, minW: 3, minH: 3, maxW: 12, maxH: 12 },
-    { i: 'sin-resumen', x: 3, y: 5, w: 3, h: 4, minW: 3, minH: 3, maxW: 12, maxH: 12 },
-    { i: 'personas', x: 6, y: 5, w: 3, h: 4, minW: 3, minH: 3, maxW: 12, maxH: 12 },
-    { i: 'duracion', x: 9, y: 5, w: 3, h: 4, minW: 3, minH: 3, maxW: 12, maxH: 12 },
+    { i: 'mias', x: 0, y: 0, w: 6, h: 5, minW: 3, minH: 4, maxW: 12, maxH: 12 },
+    { i: 'seguimiento', x: 6, y: 0, w: 6, h: 5, minW: 3, minH: 4, maxW: 12, maxH: 12 },
+    { i: 'quejas', x: 0, y: 5, w: 3, h: 5, minW: 3, minH: 4, maxW: 12, maxH: 12 },
+    { i: 'sin-resumen', x: 3, y: 5, w: 3, h: 5, minW: 3, minH: 4, maxW: 12, maxH: 12 },
+    { i: 'personas', x: 6, y: 5, w: 3, h: 5, minW: 3, minH: 4, maxW: 12, maxH: 12 },
+    { i: 'duracion', x: 9, y: 5, w: 3, h: 5, minW: 3, minH: 4, maxW: 12, maxH: 12 },
     { i: 'pendientes', x: 0, y: 10, w: 12, h: 11, minW: 4, minH: 7, maxW: 12, maxH: 24 },
     { i: 'recientes', x: 0, y: 21, w: 12, h: 13, minW: 4, minH: 7, maxW: 12, maxH: 26 },
   ],

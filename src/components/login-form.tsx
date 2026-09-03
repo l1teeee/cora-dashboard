@@ -39,8 +39,7 @@ export function LoginForm() {
     <SignInPage
       title="Bienvenido a CORA"
       description="Ingresa tus credenciales para gestionar las llamadas del equipo."
-      heroImageSrc="/login-hero.svg"
-      testimonials={[]}
+      heroVideoSrc="/auth-login.mp4"
       onSignIn={manejarEnvio}
       error={error ? 'Usuario o contrasena incorrectos' : undefined}
       loading={cargando}

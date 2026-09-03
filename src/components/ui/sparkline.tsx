@@ -2,6 +2,10 @@ import { useId } from "react"
 
 import { cn } from "@/lib/utils"
 
+// Espacio de coordenadas interno del viewBox, no pixeles: con preserveAspectRatio="none"
+// el SVG se estira a la altura real que le dé su contenedor.
+const ALTO_VIEWBOX = 32
+
 function trazarCurvaSuave(puntos: { x: number; y: number }[]) {
   let d = `M ${puntos[0].x} ${puntos[0].y}`
   for (let i = 0; i < puntos.length - 1; i++) {
@@ -15,15 +19,7 @@ function trazarCurvaSuave(puntos: { x: number; y: number }[]) {
   return d
 }
 
-function Sparkline({
-  datos,
-  alto = 32,
-  className,
-}: {
-  datos: number[]
-  alto?: number
-  className?: string
-}) {
+function Sparkline({ datos, className }: { datos: number[]; className?: string }) {
   const idGradiente = useId()
 
   if (datos.length < 2) return null
@@ -34,23 +30,25 @@ function Sparkline({
 
   const puntos = datos.map((valor, i) => {
     const x = (i / (datos.length - 1)) * 100
-    const y = rango === 0 ? alto / 2 : alto - 2 - ((valor - min) / rango) * (alto - 4)
+    const y =
+      rango === 0
+        ? ALTO_VIEWBOX / 2
+        : ALTO_VIEWBOX - 2 - ((valor - min) / rango) * (ALTO_VIEWBOX - 4)
     return { x, y }
   })
 
   const curva = trazarCurvaSuave(puntos)
   const ultimo = puntos[puntos.length - 1]
   const primero = puntos[0]
-  const areaBajoLaCurva = `${curva} L ${ultimo.x} ${alto} L ${primero.x} ${alto} Z`
+  const areaBajoLaCurva = `${curva} L ${ultimo.x} ${ALTO_VIEWBOX} L ${primero.x} ${ALTO_VIEWBOX} Z`
 
   return (
     <svg
-      viewBox={`0 0 100 ${alto}`}
+      viewBox={`0 0 100 ${ALTO_VIEWBOX}`}
       preserveAspectRatio="none"
-      // Sin alto explicito el SVG conserva la relacion del viewBox y crece con el ancho
-      // de la tarjeta, estirando la fila entera del grid.
-      style={{ height: alto }}
-      className={cn("w-full shrink-0", className)}
+      // La altura la pone el contenedor, no el SVG: dentro de una rejilla redimensionable
+      // una altura propia en pixeles desborda la tarjeta en cuanto la celda es mas baja.
+      className={cn("block h-full w-full", className)}
       aria-hidden="true"
     >
       <defs>
