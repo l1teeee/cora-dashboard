@@ -17,7 +17,7 @@ export function ReproductorGrabacion({ callId }: { callId: string }) {
   }
 
   return (
-    <div className="rounded-lg bg-muted p-2">
+    <div className="rounded-[10px] bg-muted p-3 ring-1 ring-border/60">
       <audio
         controls
         className="w-full"

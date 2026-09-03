@@ -17,12 +17,12 @@ export default async function Page() {
   }
 
   return (
-    <>
+    <div className="space-y-7">
       <PageHeader
         titulo="Asistente"
         descripcion="Configuracion, base de conocimiento e historial de cambios del asistente de voz"
       />
       <PanelAsistente />
-    </>
+    </div>
   );
 }

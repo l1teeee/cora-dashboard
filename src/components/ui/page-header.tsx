@@ -17,14 +17,14 @@ function PageHeader({
     <div
       data-slot="page-header"
       className={cn(
-        "flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between",
+        "flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between",
         className
       )}
     >
       <div>
-        <h1 className="text-xl font-semibold tracking-tight">{titulo}</h1>
+        <h1 className="text-2xl font-semibold tracking-[-0.03em] sm:text-[1.875rem]">{titulo}</h1>
         {descripcion ? (
-          <p className="text-sm text-muted-foreground mt-0.5">{descripcion}</p>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">{descripcion}</p>
         ) : null}
       </div>
       {children ? (

@@ -35,6 +35,9 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
+  --color-canvas: var(--canvas);
+  --color-frame-border: var(--frame-border);
+
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -60,23 +63,26 @@
 }
 
 :root {
-  --radius: 0.625rem;
+  --radius: 0.875rem;
 
-  --background: oklch(0.979 0.001 106);
-  --foreground: oklch(0.169 0.002 286);
+  --canvas: oklch(0.18 0.006 258);
+  --frame-border: oklch(0.145 0.006 258);
+
+  --background: oklch(0.965 0.003 95);
+  --foreground: oklch(0.183 0.006 258);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.169 0.002 286);
+  --card-foreground: oklch(0.183 0.006 258);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.169 0.002 286);
+  --popover-foreground: oklch(0.183 0.006 258);
 
-  --primary: oklch(0.528 0.15 256);
+  --primary: oklch(0.505 0.148 255);
   --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.968 0.002 286);
-  --secondary-foreground: oklch(0.25 0.005 286);
-  --muted: oklch(0.968 0.002 286);
-  --muted-foreground: oklch(0.509 0.009 286);
-  --accent: oklch(0.962 0.012 256);
-  --accent-foreground: oklch(0.35 0.07 256);
+  --secondary: oklch(0.938 0.003 95);
+  --secondary-foreground: oklch(0.255 0.006 258);
+  --muted: oklch(0.938 0.003 95);
+  --muted-foreground: oklch(0.51 0.01 258);
+  --accent: oklch(0.94 0.012 255);
+  --accent-foreground: oklch(0.33 0.07 255);
 
   /* Estados: nunca comunican solos, siempre acompanados de icono y etiqueta. */
   --destructive: oklch(0.529 0.189 25);
@@ -86,9 +92,11 @@
   --warning: oklch(0.508 0.108 73);
   --warning-foreground: oklch(0.99 0 0);
 
-  --border: oklch(0.924 0.003 106);
-  --input: oklch(0.905 0.003 286);
-  --ring: oklch(0.528 0.15 256);
+  --border: oklch(0.902 0.003 95);
+  --input: oklch(0.89 0.003 95);
+  /* Neutro a proposito: el foco azul competia con los botones primarios y
+     saturaba los formularios largos. Sigue siendo visible para navegar con teclado. */
+  --ring: oklch(0.62 0.008 258);
 
   --chart-1: oklch(0.575 0.163 255);
   --chart-2: oklch(0.671 0.175 41);
@@ -96,32 +104,35 @@
   --chart-4: oklch(0.764 0.161 75);
   --chart-5: oklch(0.716 0.141 357);
 
-  --sidebar: oklch(1 0 0);
-  --sidebar-foreground: oklch(0.169 0.002 286);
-  --sidebar-primary: oklch(0.528 0.15 256);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.962 0.012 256);
-  --sidebar-accent-foreground: oklch(0.35 0.07 256);
-  --sidebar-border: oklch(0.924 0.003 106);
-  --sidebar-ring: oklch(0.528 0.15 256);
+  --sidebar: oklch(0.18 0.006 258);
+  --sidebar-foreground: oklch(0.955 0.002 95);
+  --sidebar-primary: oklch(0.72 0.17 145);
+  --sidebar-primary-foreground: oklch(0.16 0.01 258);
+  --sidebar-accent: oklch(0.985 0 0);
+  --sidebar-accent-foreground: oklch(0.18 0.006 258);
+  --sidebar-border: oklch(1 0 0 / 9%);
+  --sidebar-ring: oklch(0.72 0.17 145);
 }
 
 .dark {
-  --background: oklch(0.168 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.213 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.213 0 0);
-  --popover-foreground: oklch(0.985 0 0);
+  --canvas: oklch(0.125 0.006 258);
+  --frame-border: oklch(1 0 0 / 14%);
+
+  --background: oklch(0.16 0.006 258);
+  --foreground: oklch(0.955 0.002 95);
+  --card: oklch(0.205 0.007 258);
+  --card-foreground: oklch(0.955 0.002 95);
+  --popover: oklch(0.205 0.007 258);
+  --popover-foreground: oklch(0.955 0.002 95);
 
   --primary: oklch(0.685 0.143 256);
   --primary-foreground: oklch(0.17 0.02 258);
-  --secondary: oklch(0.269 0.004 286);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0.004 286);
-  --muted-foreground: oklch(0.711 0.007 286);
-  --accent: oklch(0.29 0.028 256);
-  --accent-foreground: oklch(0.92 0.04 256);
+  --secondary: oklch(0.258 0.008 258);
+  --secondary-foreground: oklch(0.955 0.002 95);
+  --muted: oklch(0.258 0.008 258);
+  --muted-foreground: oklch(0.71 0.009 258);
+  --accent: oklch(0.29 0.022 255);
+  --accent-foreground: oklch(0.92 0.035 255);
 
   --destructive: oklch(0.669 0.159 22);
   --destructive-foreground: oklch(0.17 0.01 22);
@@ -130,9 +141,9 @@
   --warning: oklch(0.811 0.164 78);
   --warning-foreground: oklch(0.17 0.02 78);
 
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.685 0.143 256);
+  --border: oklch(1 0 0 / 9%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.62 0.008 258);
 
   --chart-1: oklch(0.622 0.161 255);
   --chart-2: oklch(0.622 0.173 40);
@@ -140,12 +151,12 @@
   --chart-4: oklch(0.67 0.143 73);
   --chart-5: oklch(0.622 0.171 1);
 
-  --sidebar: oklch(0.193 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.685 0.143 256);
-  --sidebar-primary-foreground: oklch(0.17 0.02 258);
-  --sidebar-accent: oklch(0.29 0.028 256);
-  --sidebar-accent-foreground: oklch(0.92 0.04 256);
+  --sidebar: oklch(0.125 0.006 258);
+  --sidebar-foreground: oklch(0.955 0.002 95);
+  --sidebar-primary: oklch(0.75 0.17 145);
+  --sidebar-primary-foreground: oklch(0.14 0.01 258);
+  --sidebar-accent: oklch(0.94 0.003 95);
+  --sidebar-accent-foreground: oklch(0.18 0.006 258);
   --sidebar-border: oklch(1 0 0 / 8%);
   --sidebar-ring: oklch(0.685 0.143 256);
 }
@@ -163,6 +174,7 @@
 
   body {
     @apply bg-background text-foreground;
+    min-width: 20rem;
   }
 
   /* Columnas de numeros alineadas; los valores grandes de las tarjetas usan
@@ -175,10 +187,142 @@
   ::selection {
     @apply bg-primary/15;
   }
+
+  /* Barra de scroll fina, redondeada y sin pista ni flechas: la nativa rompia
+     el marco redondeado del shell. En Chrome/Safari `scrollbar-color` fuerza el
+     render heredado con botones de flecha, por eso ahi se usan los
+     pseudo-elementos webkit y las propiedades estandar quedan solo para Firefox. */
+  @supports not selector(::-webkit-scrollbar) {
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: color-mix(in oklab, var(--foreground) 20%, transparent)
+        transparent;
+    }
+  }
+
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-button {
+    display: none;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: color-mix(in oklab, var(--foreground) 18%, transparent);
+    background-clip: content-box;
+    border: 4px solid transparent;
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(in oklab, var(--foreground) 32%, transparent);
+  }
 }
 
 @layer components {
+  /* Panel de tarjetas redimensionables. El tamano de cada tarjeta viaja en variables
+     CSS en vez de clases de Tailwind porque es dinamico: las clases se generan en
+     build y `col-span-${n}` no existiria. En movil siempre ocupan el ancho completo. */
+  .panel-tarjetas > * {
+    grid-column: span 12 / span 12;
+  }
+
+  @media (min-width: 768px) {
+    .panel-tarjetas > * {
+      grid-column: span var(--ancho, 3) / span var(--ancho, 3);
+      grid-row: span var(--alto, 1) / span var(--alto, 1);
+    }
+  }
+
   .superficie {
-    @apply rounded-xl bg-card ring-1 ring-border;
+    @apply rounded-2xl bg-card shadow-[0_2px_8px_-2px_rgb(18_20_22_/_0.08),0_1px_2px_rgb(18_20_22_/_0.04)] ring-1 ring-border;
+  }
+
+  @keyframes fadeSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideRightIn {
+    from {
+      opacity: 0;
+      transform: translateX(24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes testimonialIn {
+    from {
+      opacity: 0;
+      transform: translateY(16px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .animate-element {
+    opacity: 0;
+    animation: fadeSlideIn 0.6s ease-out forwards;
+  }
+
+  .animate-slide-right {
+    opacity: 0;
+    animation: slideRightIn 0.7s ease-out forwards;
+  }
+
+  .animate-testimonial {
+    opacity: 0;
+    animation: testimonialIn 0.6s ease-out forwards;
+  }
+
+  .animate-delay-100 {
+    animation-delay: 0.1s;
+  }
+  .animate-delay-200 {
+    animation-delay: 0.2s;
+  }
+  .animate-delay-300 {
+    animation-delay: 0.3s;
+  }
+  .animate-delay-400 {
+    animation-delay: 0.4s;
+  }
+  .animate-delay-500 {
+    animation-delay: 0.5s;
+  }
+  .animate-delay-600 {
+    animation-delay: 0.6s;
+  }
+  .animate-delay-700 {
+    animation-delay: 0.7s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+    }
   }
 }

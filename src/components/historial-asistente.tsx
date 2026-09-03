@@ -159,7 +159,7 @@ export function HistorialAsistente({ onRevertido }: Props) {
         {estado.tipo === "error" && <Alert variant="destructive">{estado.mensaje}</Alert>}
 
         {estado.tipo === "listo" && (
-          <div className="overflow-x-auto rounded-xl bg-card ring-1 ring-border">
+          <div className="overflow-x-auto rounded-[1.125rem] bg-card ring-1 ring-border">
             <Table>
               <TableHeader>
                 <TableRow>

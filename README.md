@@ -18,11 +18,12 @@ Next.js 15 (App Router) · TypeScript · Tailwind v4 · shadcn/ui · Auth.js v5 
 | Detalle y transcripcion | cualquiera | solo las suyas (403 en las demas) |
 | Columna "Asignado a" | si | no |
 
-Los dos usuarios se definen por variables de entorno. No hay registro ni tabla de usuarios:
-la sesion es un JWT firmado en cookie.
+Las cuentas viven en la tabla `usuarios` del backend, con la password guardada como hash scrypt.
+El login las valida contra `POST /usuarios/verificar` y se administran desde Configuracion >
+Usuarios. La sesion es un JWT firmado en cookie, con una duracion de 8 horas.
 
-El usuario del agente **es** el valor guardado en la columna `usuario_asignado` del backend.
-Si `AGENTE_USUARIO=maria.gomez`, ese agente vera las llamadas cuyo `usuario_asignado` sea
+El `login` del agente **es** el valor guardado en la columna `usuario_asignado` del backend.
+Si el agente entra como `maria.gomez`, vera las llamadas cuyo `usuario_asignado` sea
 exactamente `maria.gomez`.
 
 ## Como se protege la admin key
@@ -122,11 +123,12 @@ que haria creer al admin que su cambio no se aplico.
 | --- | --- |
 | `RAILWAY_BACKEND_URL` | URL del backend de CORA, sin barra final |
 | `RAILWAY_ADMIN_KEY` | Admin key del backend. **Solo servidor** |
-| `NEXTAUTH_SECRET` | Firma la sesion. Genera uno con `openssl rand -base64 32` |
-| `ADMIN_USUARIO` / `ADMIN_PASSWORD` | Credenciales del admin |
-| `AGENTE_USUARIO` / `AGENTE_PASSWORD` | Credenciales del agente. El usuario debe coincidir con `usuario_asignado` |
+| `NEXTAUTH_SECRET` | Firma la sesion. Genera uno con `openssl rand -base64 32`. Obligatoria: sin ella el arranque falla |
 
 Ninguna lleva `NEXT_PUBLIC_`.
+
+Ya no hay credenciales en el entorno: los usuarios del panel estan en la tabla `usuarios` del
+backend y se administran desde Configuracion > Usuarios.
 
 ## Correr en local
 

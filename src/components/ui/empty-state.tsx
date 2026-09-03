@@ -19,12 +19,12 @@ function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center gap-3 px-6 py-12 text-center",
+        "flex flex-col items-center justify-center gap-3 px-6 py-14 text-center",
         className
       )}
     >
       {Icon ? (
-        <div className="flex size-10 items-center justify-center rounded-full bg-muted">
+        <div className="flex size-11 items-center justify-center rounded-full bg-muted">
           <Icon className="size-5 text-muted-foreground" strokeWidth={1.75} />
         </div>
       ) : null}

@@ -24,6 +24,7 @@ export function TemaToggle() {
     <Button
       variant="ghost"
       size="icon-sm"
+      className="rounded-full"
       onClick={alternar}
       aria-label={oscuro ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
     >

@@ -3,12 +3,32 @@ import 'server-only'
 // en este proyecto, solo en el backend de Railway. Si un Client Component importara
 // este modulo por error, el build fallaria antes de exponer la clave al navegador.
 
-export type AsistenteConfig = { id: string; nombre: string; firstMessage: string; systemPrompt: string }
+export type AsistenteConfig = {
+  id: string
+  nombre: string
+  firstMessage: string
+  systemPrompt: string
+  // Version que Vapi da al asistente. Viaja de vuelta en el PATCH para detectar
+  // que otro admin guardo mientras este tenia el formulario abierto.
+  updatedAt: string | null
+}
+
+export class ConflictoDeVersion extends Error {
+  constructor(readonly actualizadoEn: string | null) {
+    super('La configuracion cambio desde que la abriste')
+    this.name = 'ConflictoDeVersion'
+  }
+}
 export type ArchivoKb = { id: string; nombre: string; tamano: number | null; creado: string | null }
 export type Snapshot = { id: number; assistant_id: string; usuario: string; fecha: string; tamano: number }
 
 // El backend devuelve tambien voice/model/analysisPlan, que este dashboard no edita.
-type AsistenteRespuesta = AsistenteConfig & { voice?: unknown; model?: unknown; analysisPlan?: unknown }
+type AsistenteRespuesta = Omit<AsistenteConfig, 'updatedAt'> & {
+  updatedAt?: string | null
+  voice?: unknown
+  model?: unknown
+  analysisPlan?: unknown
+}
 
 async function pedir(ruta: string, init?: RequestInit): Promise<Response> {
   const base = process.env.RAILWAY_BACKEND_URL
@@ -29,8 +49,8 @@ async function pedir(ruta: string, init?: RequestInit): Promise<Response> {
   })
 }
 
-export async function leerAsistente(): Promise<AsistenteConfig> {
-  const res = await pedir('/vapi/asistente')
+export async function leerAsistente({ refrescar = false } = {}): Promise<AsistenteConfig> {
+  const res = await pedir(`/vapi/asistente${refrescar ? '?refrescar=1' : ''}`)
   if (!res.ok) throw new Error(`Backend CORA ${res.status}`)
 
   const asistente: AsistenteRespuesta = await res.json()
@@ -39,21 +59,28 @@ export async function leerAsistente(): Promise<AsistenteConfig> {
     nombre: asistente.nombre,
     firstMessage: asistente.firstMessage,
     systemPrompt: asistente.systemPrompt,
+    updatedAt: asistente.updatedAt ?? null,
   }
 }
 
 export async function actualizarAsistente(
-  cambios: { nombre?: string; firstMessage?: string; systemPrompt?: string },
+  cambios: { nombre?: string; firstMessage?: string; systemPrompt?: string; updatedAt?: string | null },
   usuario: string
-): Promise<{ auditoriaRegistrada: boolean }> {
+): Promise<{ auditoriaRegistrada: boolean; updatedAt: string | null }> {
   const res = await pedir('/vapi/asistente', {
     method: 'PATCH',
     body: JSON.stringify({ ...cambios, usuario }),
   })
+
+  if (res.status === 409) {
+    const cuerpo: { actualizadoEn?: string | null } = await res.json().catch(() => ({}))
+    throw new ConflictoDeVersion(cuerpo.actualizadoEn ?? null)
+  }
+
   if (!res.ok) throw new Error(`Backend CORA ${res.status}`)
 
-  const respuesta: { auditoriaRegistrada: boolean } = await res.json()
-  return { auditoriaRegistrada: respuesta.auditoriaRegistrada }
+  const respuesta: { auditoriaRegistrada: boolean; updatedAt?: string | null } = await res.json()
+  return { auditoriaRegistrada: respuesta.auditoriaRegistrada, updatedAt: respuesta.updatedAt ?? null }
 }
 
 export async function listarArchivos(): Promise<ArchivoKb[]> {

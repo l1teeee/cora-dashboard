@@ -194,7 +194,7 @@ export function PanelConocimiento() {
         <CardTitle>Base de conocimiento</CardTitle>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-5">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <Field
             label="Subir documento"
@@ -208,7 +208,7 @@ export function PanelConocimiento() {
               accept=".pdf,.docx,.txt"
               disabled={subiendo}
               onChange={manejarSeleccionArchivo}
-              className="text-sm text-muted-foreground file:mr-3 file:rounded-lg file:border file:border-input file:bg-card file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-foreground hover:file:bg-accent disabled:pointer-events-none disabled:opacity-50"
+              className="text-sm text-muted-foreground file:mr-3 file:rounded-[10px] file:border file:border-input file:bg-card file:px-3 file:py-2 file:text-sm file:font-medium file:text-foreground hover:file:bg-accent disabled:pointer-events-none disabled:opacity-50"
             />
           </Field>
           {subiendo && (
@@ -237,7 +237,7 @@ export function PanelConocimiento() {
         )}
 
         {estado.tipo === "listo" && (
-          <div className="overflow-x-auto rounded-xl bg-card ring-1 ring-border">
+          <div className="overflow-x-auto rounded-[1.125rem] bg-card ring-1 ring-border">
             <Table>
               <TableHeader>
                 <TableRow>

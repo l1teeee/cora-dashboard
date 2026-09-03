@@ -19,8 +19,8 @@ function Field({
   className?: string
 }) {
   return (
-    <div data-slot="field" className={cn("flex flex-col gap-1.5", className)}>
-      <label htmlFor={htmlFor} className="text-sm font-medium text-foreground">
+    <div data-slot="field" className={cn("flex flex-col gap-2", className)}>
+      <label htmlFor={htmlFor} className="text-[13px] font-medium text-foreground">
         {label}
       </label>
       {children}

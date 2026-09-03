@@ -1,47 +1,38 @@
-import { timingSafeEqual } from 'crypto'
+import { listarUsuarios, verificarCredenciales } from './usuarios-api'
 
 export type Rol = 'admin' | 'agente'
 
-export type UsuarioDemo = {
+export type UsuarioDeSesion = {
   id: string
   nombre: string
   rol: Rol
-  password: string
 }
 
-// Comparacion en tiempo constante para evitar timing attacks.
-// timingSafeEqual lanza si los buffers tienen longitudes distintas, por eso se corta antes de llamarla.
-function comparaSeguro(a: string, b: string): boolean {
-  const bufferA = Buffer.from(a)
-  const bufferB = Buffer.from(b)
-  if (bufferA.length !== bufferB.length) return false
-  return timingSafeEqual(bufferA, bufferB)
+export type Asignable = {
+  id: string
+  nombre: string
 }
 
-function listaUsuarios(): UsuarioDemo[] {
-  const usuarios: UsuarioDemo[] = []
-
-  const adminUsuario = process.env.ADMIN_USUARIO
-  const adminPassword = process.env.ADMIN_PASSWORD
-  if (adminUsuario && adminPassword) {
-    usuarios.push({ id: adminUsuario, nombre: adminUsuario, rol: 'admin', password: adminPassword })
-  }
-
-  const agenteUsuario = process.env.AGENTE_USUARIO
-  const agentePassword = process.env.AGENTE_PASSWORD
-  if (agenteUsuario && agentePassword) {
-    usuarios.push({ id: agenteUsuario, nombre: agenteUsuario, rol: 'agente', password: agentePassword })
-  }
-
-  return usuarios
-}
-
-export function buscarUsuario(usuario: string, password: string): Omit<UsuarioDemo, 'password'> | null {
-  const encontrado = listaUsuarios().find(
-    (u) => comparaSeguro(usuario, u.id) && comparaSeguro(password, u.password)
-  )
-
+// El id de la sesion es el login: es el valor que llamadas.usuario_asignado guarda
+// y contra el que se compara para decidir que llamadas ve cada agente.
+export async function buscarUsuario(usuario: string, password: string): Promise<UsuarioDeSesion | null> {
+  const encontrado = await verificarCredenciales(usuario, password)
   if (!encontrado) return null
 
-  return { id: encontrado.id, nombre: encontrado.nombre, rol: encontrado.rol }
+  return { id: encontrado.login, nombre: encontrado.nombre, rol: encontrado.rol }
+}
+
+export async function listarAsignables(): Promise<Asignable[]> {
+  try {
+    const usuarios = await listarUsuarios()
+
+    return usuarios
+      .filter((usuario) => usuario.rol === 'agente' && usuario.activo === 1)
+      .map((usuario) => ({ id: usuario.login, nombre: usuario.nombre }))
+  } catch (error) {
+    // El selector de asignacion es un accesorio de pantallas que tienen que seguir
+    // sirviendo llamadas: si el backend falla se muestra vacio, no se cae la pagina.
+    console.error(error)
+    return []
+  }
 }

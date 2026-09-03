@@ -1,0 +1,150 @@
+.panel-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--card);
+  padding: 0.8rem;
+  color: var(--foreground);
+  box-shadow: 0 2px 8px -2px rgb(18 20 22 / 8%);
+}
+
+.panel-toolbar-activa {
+  border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
+  background: color-mix(in srgb, var(--primary) 6%, var(--card));
+}
+
+.panel-toolbar-titulo {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.panel-toolbar-activa .panel-toolbar-titulo::before {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-right: 0.5rem;
+  border-radius: 999px;
+  background: var(--primary);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 22%, transparent);
+  content: '';
+}
+
+.panel-toolbar-copy {
+  margin-top: 0.125rem;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.panel-widget-grid-editando {
+  /* El alto adicional deja filas vacias para reubicar tarjetas. */
+  border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+  border-radius: 1.75rem;
+  background-color: color-mix(in srgb, var(--muted) 45%, transparent);
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--border) 60%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--border) 60%, transparent) 1px, transparent 1px);
+  background-position: -1px -1px;
+  background-size: calc((100% + 20px) / 12) 44px;
+}
+
+.panel-widget-grid-editando .react-grid-placeholder {
+  border: 2px dashed var(--primary) !important;
+  border-radius: 1.5rem !important;
+  background: color-mix(in srgb, var(--primary) 22%, transparent) !important;
+  opacity: 1 !important;
+}
+
+.panel-widget-frame {
+  height: 100%;
+}
+
+.panel-widget-frame-editando {
+  cursor: grab;
+  outline: 1px solid color-mix(in srgb, var(--foreground) 28%, transparent);
+  outline-offset: 3px;
+  border-radius: 1.25rem;
+  transition: outline-color 160ms ease, box-shadow 160ms ease;
+}
+
+.panel-widget-frame-editando:focus-visible,
+.panel-widget-frame-seleccionado {
+  outline: 3px solid var(--primary);
+  outline-offset: 4px;
+  box-shadow: 0 0 0 8px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+.panel-widget-grid-editando .react-grid-item.react-draggable-dragging .panel-widget-frame-editando {
+  cursor: grabbing;
+  box-shadow: 0 18px 34px rgb(18 20 22 / 26%);
+}
+
+.panel-widget-contenido[inert] {
+  pointer-events: none;
+  user-select: none;
+}
+
+.panel-resize-handle {
+  position: absolute;
+  z-index: 30;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  opacity: 0;
+  pointer-events: none;
+  touch-action: none;
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.panel-widget-grid-editando .panel-resize-handle {
+  /* Son los nodos reales que react-resizable controla; nunca son decorativos. */
+  opacity: 0.72;
+  pointer-events: auto;
+}
+
+.panel-widget-frame-seleccionado .panel-resize-handle,
+.panel-widget-frame-editando:hover .panel-resize-handle {
+  opacity: 1;
+}
+
+.panel-resize-handle-dot {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--card);
+  border-radius: 999px;
+  background: var(--primary);
+  box-shadow: 0 2px 8px rgb(18 20 22 / 30%);
+}
+
+.panel-resize-handle:hover .panel-resize-handle-dot,
+.panel-resize-handle:active .panel-resize-handle-dot {
+  transform: scale(1.2);
+}
+
+.panel-resize-handle-n { top: -22px; left: calc(50% - 22px); cursor: ns-resize; }
+.panel-resize-handle-e { top: calc(50% - 22px); right: -22px; cursor: ew-resize; }
+.panel-resize-handle-s { bottom: -22px; left: calc(50% - 22px); cursor: ns-resize; }
+.panel-resize-handle-w { top: calc(50% - 22px); left: -22px; cursor: ew-resize; }
+
+.panel-widget-medida {
+  position: absolute;
+  z-index: 31;
+  top: 0.75rem;
+  right: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--popover);
+  padding: 0.2rem 0.5rem;
+  color: var(--foreground);
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+@media (max-width: 640px) {
+  .panel-toolbar { align-items: flex-start; }
+}

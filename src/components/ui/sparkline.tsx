@@ -1,4 +1,19 @@
+import { useId } from "react"
+
 import { cn } from "@/lib/utils"
+
+function trazarCurvaSuave(puntos: { x: number; y: number }[]) {
+  let d = `M ${puntos[0].x} ${puntos[0].y}`
+  for (let i = 0; i < puntos.length - 1; i++) {
+    const actual = puntos[i]
+    const siguiente = puntos[i + 1]
+    const puntoMedio = { x: (actual.x + siguiente.x) / 2, y: (actual.y + siguiente.y) / 2 }
+    d += ` Q ${actual.x} ${actual.y} ${puntoMedio.x} ${puntoMedio.y}`
+  }
+  const ultimo = puntos[puntos.length - 1]
+  d += ` Q ${ultimo.x} ${ultimo.y} ${ultimo.x} ${ultimo.y}`
+  return d
+}
 
 function Sparkline({
   datos,
@@ -9,6 +24,8 @@ function Sparkline({
   alto?: number
   className?: string
 }) {
+  const idGradiente = useId()
+
   if (datos.length < 2) return null
 
   const min = Math.min(...datos)
@@ -21,33 +38,48 @@ function Sparkline({
     return { x, y }
   })
 
-  const puntosStr = puntos.map((p) => `${p.x},${p.y}`).join(" ")
+  const curva = trazarCurvaSuave(puntos)
   const ultimo = puntos[puntos.length - 1]
+  const primero = puntos[0]
+  const areaBajoLaCurva = `${curva} L ${ultimo.x} ${alto} L ${primero.x} ${alto} Z`
 
   return (
     <svg
       viewBox={`0 0 100 ${alto}`}
       preserveAspectRatio="none"
-      className={cn("w-full", className)}
+      // Sin alto explicito el SVG conserva la relacion del viewBox y crece con el ancho
+      // de la tarjeta, estirando la fila entera del grid.
+      style={{ height: alto }}
+      className={cn("w-full shrink-0", className)}
       aria-hidden="true"
     >
-      <polyline
-        points={puntosStr}
+      <defs>
+        <linearGradient id={`${idGradiente}-linea`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="var(--color-chart-2)" />
+          <stop offset="100%" stopColor="var(--color-chart-3)" />
+        </linearGradient>
+        <linearGradient id={`${idGradiente}-area`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="var(--color-chart-3)" stopOpacity={0.22} />
+          <stop offset="100%" stopColor="var(--color-chart-3)" stopOpacity={0} />
+        </linearGradient>
+      </defs>
+      <path d={areaBajoLaCurva} fill={`url(#${idGradiente}-area)`} stroke="none" />
+      <path
+        d={curva}
         fill="none"
-        stroke="currentColor"
+        stroke={`url(#${idGradiente}-linea)`}
         strokeWidth={2}
         strokeLinecap="round"
         strokeLinejoin="round"
         vectorEffect="non-scaling-stroke"
-        className="text-muted-foreground/50"
       />
       <circle
         cx={ultimo.x}
         cy={ultimo.y}
-        r={2}
+        r={2.25}
         fill="currentColor"
         vectorEffect="non-scaling-stroke"
-        className="text-primary"
+        className="text-chart-3"
       />
     </svg>
   )

@@ -17,9 +17,9 @@ export default async function Page() {
   }
 
   return (
-    <>
+    <div className="space-y-7">
       <PageHeader titulo="Auditoria" descripcion="Registro de cambios realizados sobre el asistente" />
       <TablaAuditoria />
-    </>
+    </div>
   );
 }

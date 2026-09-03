@@ -13,9 +13,13 @@ import { Separator } from "@/components/ui/separator";
 import { TemaToggle } from "@/components/tema-toggle";
 
 const SECCIONES: Record<string, string> = {
-  "/dashboard": "Llamadas",
+  "/dashboard": "Dashboard",
+  "/dashboard/llamadas": "Llamadas",
   "/dashboard/asistente": "Asistente",
+  "/dashboard/contactos": "Contactos",
+  "/dashboard/usuarios": "Usuarios",
   "/dashboard/auditoria": "Auditoria",
+  "/dashboard/configuracion": "Configuracion",
 };
 
 export function BarraSuperior({
@@ -35,7 +39,7 @@ export function BarraSuperior({
   const seccion = SECCIONES[pathname] ?? "Panel";
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur-sm sm:px-6">
+    <header className="flex h-16 shrink-0 items-center gap-3 border-b border-border bg-background px-4 sm:px-6 lg:px-8">
       <Button
         variant="ghost"
         size="icon-sm"
@@ -60,8 +64,9 @@ export function BarraSuperior({
       </Button>
 
       <div className="flex items-center gap-1.5">
-        <span className="hidden text-sm text-muted-foreground sm:inline">CORA /</span>
-        <span className="text-sm font-medium text-foreground">{seccion}</span>
+        <span className="hidden text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground sm:inline">CORA</span>
+        <span className="hidden text-muted-foreground sm:inline">/</span>
+        <span className="text-sm font-semibold text-foreground">{seccion}</span>
       </div>
 
       <div className="ml-auto flex items-center gap-2">

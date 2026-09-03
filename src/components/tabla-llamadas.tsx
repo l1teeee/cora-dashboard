@@ -12,7 +12,9 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Paginacion } from "@/components/ui/pagination";
 import { DetalleLlamada } from "@/components/detalle-llamada";
+import { SelectAsignacion } from "@/components/select-asignacion";
 import {
   formatearCosto,
   formatearDuracion,
@@ -28,24 +30,40 @@ function truncar(texto: string, limite: number) {
 export function TablaLlamadas({
   llamadas,
   rol,
+  porPagina,
+  asignables = [],
 }: {
   llamadas: Llamada[];
   rol: Rol;
+  porPagina?: number;
+  asignables?: { id: string; nombre: string }[];
 }) {
   const [callIdSeleccionado, setCallIdSeleccionado] = useState<string | null>(
     null
   );
+  const [pagina, setPagina] = useState(1);
 
   const columnas = rol === "admin" ? 7 : 6;
 
+  const totalPaginas = porPagina
+    ? Math.max(1, Math.ceil(llamadas.length / porPagina))
+    : 1;
+  const paginaSegura = Math.min(pagina, totalPaginas);
+  const llamadasPagina = porPagina
+    ? llamadas.slice(
+        (paginaSegura - 1) * porPagina,
+        paginaSegura * porPagina
+      )
+    : llamadas;
+
   return (
     <>
-      <div className="overflow-hidden rounded-xl bg-card ring-1 ring-border">
+      <div className="overflow-hidden rounded-2xl bg-card shadow-[0_2px_8px_-2px_rgb(18_20_22_/_0.08),0_1px_2px_rgb(18_20_22_/_0.04)] ring-1 ring-border">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Fecha</TableHead>
-              <TableHead>Numero</TableHead>
+              <TableHead>Quien llamo</TableHead>
               <TableHead>Duracion</TableHead>
               <TableHead>Costo</TableHead>
               <TableHead>Finalizacion</TableHead>
@@ -65,7 +83,7 @@ export function TablaLlamadas({
                 </TableCell>
               </TableRow>
             ) : (
-              llamadas.map((llamada) => (
+              llamadasPagina.map((llamada) => (
                 <TableRow
                   key={llamada.id}
                   tabIndex={0}
@@ -80,13 +98,24 @@ export function TablaLlamadas({
                       setCallIdSeleccionado(llamada.call_id);
                     }
                   }}
-                  className="cursor-pointer focus-visible:outline-none focus-visible:bg-muted/60"
+                  className="cursor-pointer focus-visible:outline-none focus-visible:bg-primary/8"
                 >
                   <TableCell className="font-medium text-foreground">
                     {formatearFecha(llamada.fecha)}
                   </TableCell>
-                  <TableCell className="font-mono text-xs text-muted-foreground">
-                    {llamada.numero_telefono ?? "-"}
+                  <TableCell>
+                    {llamada.nombre_capturado ? (
+                      <>
+                        <span className="text-foreground">{llamada.nombre_capturado}</span>
+                        <span className="block font-mono text-xs text-muted-foreground">
+                          {llamada.numero_telefono ?? "-"}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="font-mono text-xs text-muted-foreground">
+                        {llamada.numero_telefono ?? "-"}
+                      </span>
+                    )}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {formatearDuracion(llamada.duracion)}
@@ -111,7 +140,15 @@ export function TablaLlamadas({
                   </TableCell>
                   {rol === "admin" && (
                     <TableCell className="text-muted-foreground">
-                      {llamada.usuario_asignado ?? "Sin asignar"}
+                      {asignables.length > 0 ? (
+                        <SelectAsignacion
+                          callId={llamada.call_id}
+                          asignadoA={llamada.usuario_asignado}
+                          asignables={asignables}
+                        />
+                      ) : (
+                        (llamada.usuario_asignado ?? "Sin asignar")
+                      )}
                     </TableCell>
                   )}
                 </TableRow>
@@ -119,6 +156,21 @@ export function TablaLlamadas({
             )}
           </TableBody>
         </Table>
+
+        {porPagina && llamadas.length > 0 && (
+          <div className="flex items-center justify-between gap-4 border-t border-border px-4 py-3">
+            <p className="text-xs text-muted-foreground">
+              Mostrando {(paginaSegura - 1) * porPagina + 1}-
+              {Math.min(paginaSegura * porPagina, llamadas.length)} de{" "}
+              {llamadas.length} llamadas
+            </p>
+            <Paginacion
+              paginaActual={paginaSegura}
+              totalPaginas={totalPaginas}
+              onCambiar={setPagina}
+            />
+          </div>
+        )}
       </div>
 
       <DetalleLlamada

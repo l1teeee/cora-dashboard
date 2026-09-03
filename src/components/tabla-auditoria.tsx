@@ -110,7 +110,7 @@ export function TablaAuditoria() {
           id="filtro-accion"
           value={filtro}
           onChange={(evento) => setFiltro(evento.target.value)}
-          className="h-9 w-full rounded-lg border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+          className="h-10 w-full rounded-[10px] border border-input bg-card px-3 text-sm shadow-[0_1px_2px_rgb(18_20_22_/_0.03)] outline-none transition-[border-color,box-shadow] duration-150 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 dark:bg-input/30"
         >
           <option value="">Todas</option>
           {Object.entries(ETIQUETAS_ACCION).map(([valor, etiqueta]) => (
@@ -136,7 +136,7 @@ export function TablaAuditoria() {
       )}
 
       {estado.tipo === "listo" && (
-        <div className="overflow-x-auto rounded-xl bg-card ring-1 ring-border">
+        <div className="overflow-x-auto rounded-[1.125rem] bg-card ring-1 ring-border">
           <Table>
             <TableHeader>
               <TableRow>

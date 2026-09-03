@@ -38,25 +38,29 @@ export function ShellDashboard({
   }
 
   return (
-    <div className="flex min-h-screen w-full bg-background">
-      <BarraLateral
-        rol={rol}
-        usuario={usuario}
-        colapsada={colapsada}
-        abiertaMovil={abiertaMovil}
-        onCerrarMovil={() => setAbiertaMovil(false)}
-      />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <BarraSuperior
-          usuario={usuario}
+    <div className="flex h-screen w-full bg-canvas p-2 sm:p-3 lg:p-4">
+      {/* El marco toma el color de la barra lateral para que las esquinas
+          redondeadas del panel de contenido revelen el fondo oscuro. */}
+      <div className="flex h-full w-full overflow-hidden rounded-3xl border-2 border-frame-border bg-sidebar shadow-[0_24px_60px_-16px_rgb(0_0_0_/_0.35)]">
+        <BarraLateral
           rol={rol}
+          usuario={usuario}
           colapsada={colapsada}
-          onToggleColapsada={alternarColapsada}
-          onAbrirMovil={() => setAbiertaMovil(true)}
+          abiertaMovil={abiertaMovil}
+          onCerrarMovil={() => setAbiertaMovil(false)}
         />
-        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
-          <div className="mx-auto w-full max-w-6xl space-y-6">{children}</div>
-        </main>
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden bg-background lg:rounded-l-3xl">
+          <BarraSuperior
+            usuario={usuario}
+            rol={rol}
+            colapsada={colapsada}
+            onToggleColapsada={alternarColapsada}
+            onAbrirMovil={() => setAbiertaMovil(true)}
+          />
+          <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-9">
+            <div className="mx-auto w-full max-w-7xl space-y-7">{children}</div>
+          </main>
+        </div>
       </div>
     </div>
   );

@@ -10,7 +10,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const alertVariants = cva(
-  "flex w-full items-start gap-2.5 rounded-lg border px-3 py-2.5 text-sm",
+  "flex w-full items-start gap-2.5 rounded-[10px] border px-3.5 py-3 text-sm",
   {
     variants: {
       variant: {
