@@ -3,8 +3,11 @@
 import { useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
+import { Loader2Icon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Field } from '@/components/ui/field'
+import { Alert } from '@/components/ui/alert'
 import {
   Card,
   CardContent,
@@ -49,10 +52,7 @@ export function LoginForm() {
       </CardHeader>
       <CardContent>
         <form onSubmit={manejarEnvio} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="usuario" className="text-sm font-medium">
-              Usuario
-            </label>
+          <Field label="Usuario" htmlFor="usuario">
             <Input
               id="usuario"
               name="usuario"
@@ -63,11 +63,8 @@ export function LoginForm() {
               disabled={cargando}
               required
             />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="password" className="text-sm font-medium">
-              Contraseña
-            </label>
+          </Field>
+          <Field label="Contrasena" htmlFor="password">
             <Input
               id="password"
               name="password"
@@ -78,11 +75,10 @@ export function LoginForm() {
               disabled={cargando}
               required
             />
-          </div>
-          {error && (
-            <p className="text-sm text-red-600">Usuario o contraseña incorrectos</p>
-          )}
+          </Field>
+          {error && <Alert variant="destructive">Usuario o contrasena incorrectos</Alert>}
           <Button type="submit" disabled={cargando} className="w-full">
+            {cargando && <Loader2Icon className="size-4 animate-spin" strokeWidth={1.75} />}
             {cargando ? 'Entrando...' : 'Entrar'}
           </Button>
         </form>

@@ -13,10 +13,10 @@ export function PanelAsistente() {
   const [version, setVersion] = useState(0);
 
   return (
-    <>
+    <div className="space-y-6">
       <FormAsistente key={version} />
       <PanelConocimiento />
       <HistorialAsistente onRevertido={() => setVersion((v) => v + 1)} />
-    </>
+    </div>
   );
 }

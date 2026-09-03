@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { HistoryIcon, Undo2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,6 +21,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Alert } from "@/components/ui/alert";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Table,
   TableBody,
@@ -153,12 +156,10 @@ export function HistorialAsistente({ onRevertido }: Props) {
           </div>
         )}
 
-        {estado.tipo === "error" && (
-          <p className="text-sm text-red-600">{estado.mensaje}</p>
-        )}
+        {estado.tipo === "error" && <Alert variant="destructive">{estado.mensaje}</Alert>}
 
         {estado.tipo === "listo" && (
-          <div className="overflow-x-auto rounded-xl bg-card ring-1 ring-foreground/10">
+          <div className="overflow-x-auto rounded-xl bg-card ring-1 ring-border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -171,22 +172,31 @@ export function HistorialAsistente({ onRevertido }: Props) {
               <TableBody>
                 {versiones.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground">
-                      Todavia no hay versiones guardadas.
+                    <TableCell colSpan={4} className="h-28 p-0">
+                      <EmptyState
+                        icon={HistoryIcon}
+                        titulo="Todavia no hay versiones guardadas."
+                        descripcion="Cada cambio en el asistente guarda automaticamente la version anterior."
+                      />
                     </TableCell>
                   </TableRow>
                 ) : (
                   versiones.map((version) => (
                     <TableRow key={version.id}>
-                      <TableCell>{formatearFecha(version.fecha)}</TableCell>
-                      <TableCell>{version.usuario}</TableCell>
-                      <TableCell>{formatearTamano(version.tamano)}</TableCell>
+                      <TableCell className="font-medium text-foreground">
+                        {formatearFecha(version.fecha)}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">{version.usuario}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {formatearTamano(version.tamano)}
+                      </TableCell>
                       <TableCell>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => setVersionARevertir(version)}
                         >
+                          <Undo2Icon className="size-4" strokeWidth={1.75} />
                           Revertir
                         </Button>
                       </TableCell>
@@ -198,8 +208,8 @@ export function HistorialAsistente({ onRevertido }: Props) {
           </div>
         )}
 
-        {mensajeExito && <p className="text-sm text-green-600">{mensajeExito}</p>}
-        {mensajeError && <p className="text-sm text-red-600">{mensajeError}</p>}
+        {mensajeExito && <Alert variant="success">{mensajeExito}</Alert>}
+        {mensajeError && <Alert variant="destructive">{mensajeError}</Alert>}
       </CardContent>
 
       <Dialog

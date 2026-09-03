@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { RefreshCwIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,6 +21,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Field } from "@/components/ui/field";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert } from "@/components/ui/alert";
 
 type Asistente = {
   id: string;
@@ -156,8 +160,11 @@ export function FormAsistente() {
 
         {estado.tipo === "error" && (
           <div className="space-y-3">
-            <p className="text-sm text-red-600">{estado.mensaje}</p>
+            <Alert variant="destructive" titulo="No se pudo cargar el asistente">
+              {estado.mensaje}
+            </Alert>
             <Button variant="outline" size="sm" onClick={cargarAsistente}>
+              <RefreshCwIcon strokeWidth={1.75} />
               Reintentar
             </Button>
           </div>
@@ -165,10 +172,7 @@ export function FormAsistente() {
 
         {estado.tipo === "listo" && editable && (
           <>
-            <div className="space-y-1.5">
-              <label htmlFor="nombre-asistente" className="text-sm font-medium">
-                Nombre del asistente
-              </label>
+            <Field label="Nombre del asistente" htmlFor="nombre-asistente">
               <Input
                 id="nombre-asistente"
                 value={editable.nombre}
@@ -176,12 +180,9 @@ export function FormAsistente() {
                   setEditable({ ...editable, nombre: evento.target.value })
                 }
               />
-            </div>
+            </Field>
 
-            <div className="space-y-1.5">
-              <label htmlFor="primer-mensaje" className="text-sm font-medium">
-                Primer mensaje
-              </label>
+            <Field label="Primer mensaje" htmlFor="primer-mensaje">
               <Input
                 id="primer-mensaje"
                 value={editable.firstMessage}
@@ -189,26 +190,23 @@ export function FormAsistente() {
                   setEditable({ ...editable, firstMessage: evento.target.value })
                 }
               />
-            </div>
+            </Field>
 
-            <div className="space-y-1.5">
-              <label htmlFor="system-prompt" className="text-sm font-medium">
-                System prompt
-              </label>
-              <textarea
+            <Field
+              label="System prompt"
+              htmlFor="system-prompt"
+              hint="El bloque delimitado por marcadores cora:kb se gestiona solo y no aparece aqui."
+            >
+              <Textarea
                 id="system-prompt"
                 rows={16}
+                className="font-mono text-xs"
                 value={editable.systemPrompt}
                 onChange={(evento) =>
                   setEditable({ ...editable, systemPrompt: evento.target.value })
                 }
-                className="w-full rounded-md border border-input bg-transparent px-3 py-2 font-mono text-xs shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
               />
-              <p className="text-xs text-muted-foreground">
-                El bloque delimitado por marcadores cora:kb se gestiona solo y no
-                aparece aqui.
-              </p>
-            </div>
+            </Field>
           </>
         )}
       </CardContent>
@@ -219,10 +217,10 @@ export function FormAsistente() {
             Guardar cambios
           </Button>
 
-          <div className="space-y-1 text-sm">
-            {mensajeExito && <p className="text-green-600">{mensajeExito}</p>}
-            {avisoAuditoria && <p className="text-amber-600">{avisoAuditoria}</p>}
-            {mensajeError && <p className="text-red-600">{mensajeError}</p>}
+          <div className="space-y-2">
+            {mensajeExito && <Alert variant="success">{mensajeExito}</Alert>}
+            {avisoAuditoria && <Alert variant="warning">{avisoAuditoria}</Alert>}
+            {mensajeError && <Alert variant="destructive">{mensajeError}</Alert>}
           </div>
         </CardFooter>
       )}
@@ -239,18 +237,20 @@ export function FormAsistente() {
           <div className="space-y-4">
             {camposCambiados.map((campo) => (
               <div key={campo.clave} className="space-y-1.5">
-                <p className="text-sm font-medium">{campo.etiqueta}</p>
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  {campo.etiqueta}
+                </p>
                 <div>
                   <p className="mb-1 text-xs text-muted-foreground">
                     Valor anterior
                   </p>
-                  <div className="rounded-md bg-red-50 px-3 py-2 text-xs text-red-900 dark:bg-red-950/40 dark:text-red-200">
+                  <div className="rounded-lg bg-destructive/10 px-3 py-2 font-mono text-xs text-destructive">
                     {truncar(original?.[campo.clave] ?? "")}
                   </div>
                 </div>
                 <div>
                   <p className="mb-1 text-xs text-muted-foreground">Valor nuevo</p>
-                  <div className="rounded-md bg-green-50 px-3 py-2 text-xs text-green-900 dark:bg-green-950/40 dark:text-green-200">
+                  <div className="rounded-lg bg-success/10 px-3 py-2 font-mono text-xs text-success">
                     {truncar(editable?.[campo.clave] ?? "")}
                   </div>
                 </div>

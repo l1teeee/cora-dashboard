@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { PhoneOffIcon } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -10,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
 import { DetalleLlamada } from "@/components/detalle-llamada";
 import {
   formatearCosto,
@@ -38,7 +40,7 @@ export function TablaLlamadas({
 
   return (
     <>
-      <div className="overflow-x-auto rounded-xl bg-card ring-1 ring-foreground/10">
+      <div className="overflow-hidden rounded-xl bg-card ring-1 ring-border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -54,25 +56,45 @@ export function TablaLlamadas({
           <TableBody>
             {llamadas.length === 0 ? (
               <TableRow>
-                <TableCell
-                  colSpan={columnas}
-                  className="text-center text-muted-foreground"
-                >
-                  No hay llamadas para mostrar
+                <TableCell colSpan={columnas} className="h-32 p-0">
+                  <EmptyState
+                    icon={PhoneOffIcon}
+                    titulo="No hay llamadas para mostrar"
+                    descripcion="Prueba a ampliar el rango de fechas."
+                  />
                 </TableCell>
               </TableRow>
             ) : (
               llamadas.map((llamada) => (
                 <TableRow
                   key={llamada.id}
-                  className="cursor-pointer"
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`Ver detalle de la llamada del ${formatearFecha(llamada.fecha)}`}
                   onClick={() => setCallIdSeleccionado(llamada.call_id)}
+                  onKeyDown={(evento) => {
+                    if (evento.key === "Enter") {
+                      setCallIdSeleccionado(llamada.call_id);
+                    } else if (evento.key === " ") {
+                      evento.preventDefault();
+                      setCallIdSeleccionado(llamada.call_id);
+                    }
+                  }}
+                  className="cursor-pointer focus-visible:outline-none focus-visible:bg-muted/60"
                 >
-                  <TableCell>{formatearFecha(llamada.fecha)}</TableCell>
-                  <TableCell>{llamada.numero_telefono ?? "-"}</TableCell>
-                  <TableCell>{formatearDuracion(llamada.duracion)}</TableCell>
-                  <TableCell>{formatearCosto(llamada.costo)}</TableCell>
-                  <TableCell>
+                  <TableCell className="font-medium text-foreground">
+                    {formatearFecha(llamada.fecha)}
+                  </TableCell>
+                  <TableCell className="font-mono text-xs text-muted-foreground">
+                    {llamada.numero_telefono ?? "-"}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {formatearDuracion(llamada.duracion)}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {formatearCosto(llamada.costo)}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
                     {llamada.razon_finalizacion ? (
                       <Badge variant="outline">{llamada.razon_finalizacion}</Badge>
                     ) : (
@@ -88,7 +110,7 @@ export function TablaLlamadas({
                     )}
                   </TableCell>
                   {rol === "admin" && (
-                    <TableCell>
+                    <TableCell className="text-muted-foreground">
                       {llamada.usuario_asignado ?? "Sin asignar"}
                     </TableCell>
                   )}

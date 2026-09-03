@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ChangeEvent } from "react";
+import { FileTextIcon, Loader2Icon, Trash2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -13,6 +14,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Field } from "@/components/ui/field";
+import { Alert } from "@/components/ui/alert";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Table,
   TableBody,
@@ -191,24 +195,29 @@ export function PanelConocimiento() {
       </CardHeader>
 
       <CardContent className="space-y-4">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="archivo-conocimiento" className="text-xs text-muted-foreground">
-              Subir documento (PDF, DOCX o TXT, maximo 300 KB)
-            </label>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <Field
+            label="Subir documento"
+            htmlFor="archivo-conocimiento"
+            hint="PDF, DOCX o TXT, maximo 300 KB"
+            error={errorValidacion ?? undefined}
+          >
             <input
               id="archivo-conocimiento"
               type="file"
               accept=".pdf,.docx,.txt"
               disabled={subiendo}
               onChange={manejarSeleccionArchivo}
-              className="text-sm text-muted-foreground file:mr-3 file:rounded-md file:border file:border-input file:bg-transparent file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-foreground hover:file:bg-muted disabled:pointer-events-none disabled:opacity-50"
+              className="text-sm text-muted-foreground file:mr-3 file:rounded-lg file:border file:border-input file:bg-card file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-foreground hover:file:bg-accent disabled:pointer-events-none disabled:opacity-50"
             />
-          </div>
-          {subiendo && <p className="text-sm text-muted-foreground">Subiendo...</p>}
+          </Field>
+          {subiendo && (
+            <span className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2Icon className="size-4 animate-spin" strokeWidth={1.75} />
+              Subiendo...
+            </span>
+          )}
         </div>
-
-        {errorValidacion && <p className="text-sm text-red-600">{errorValidacion}</p>}
 
         {estado.tipo === "cargando" && (
           <div className="space-y-2">
@@ -220,7 +229,7 @@ export function PanelConocimiento() {
 
         {estado.tipo === "error" && (
           <div className="space-y-3">
-            <p className="text-sm text-red-600">{estado.mensaje}</p>
+            <Alert variant="destructive">{estado.mensaje}</Alert>
             <Button variant="outline" size="sm" onClick={cargarArchivos}>
               Reintentar
             </Button>
@@ -228,7 +237,7 @@ export function PanelConocimiento() {
         )}
 
         {estado.tipo === "listo" && (
-          <div className="overflow-x-auto rounded-xl bg-card ring-1 ring-foreground/10">
+          <div className="overflow-x-auto rounded-xl bg-card ring-1 ring-border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -241,24 +250,30 @@ export function PanelConocimiento() {
               <TableBody>
                 {archivos.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground">
-                      No hay documentos en la base de conocimiento.
+                    <TableCell colSpan={4} className="h-28 p-0">
+                      <EmptyState
+                        icon={FileTextIcon}
+                        titulo="No hay documentos en la base de conocimiento."
+                      />
                     </TableCell>
                   </TableRow>
                 ) : (
                   archivos.map((archivo) => (
                     <TableRow key={archivo.id}>
-                      <TableCell className="max-w-xs truncate">{archivo.nombre}</TableCell>
+                      <TableCell className="max-w-xs truncate font-medium text-foreground">
+                        {archivo.nombre}
+                      </TableCell>
                       <TableCell>{formatearTamano(archivo.tamano)}</TableCell>
                       <TableCell>{formatearFecha(archivo.creado)}</TableCell>
                       <TableCell>
                         <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-red-600 hover:text-red-700"
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label={`Eliminar ${archivo.nombre}`}
+                          className="text-destructive hover:bg-destructive/10"
                           onClick={() => setArchivoAEliminar(archivo)}
                         >
-                          Eliminar
+                          <Trash2Icon strokeWidth={1.75} />
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -269,8 +284,8 @@ export function PanelConocimiento() {
           </div>
         )}
 
-        {mensajeError && <p className="text-sm text-red-600">{mensajeError}</p>}
-        {avisoAuditoria && <p className="text-sm text-amber-600">{avisoAuditoria}</p>}
+        {mensajeError && <Alert variant="destructive">{mensajeError}</Alert>}
+        {avisoAuditoria && <Alert variant="warning">{avisoAuditoria}</Alert>}
       </CardContent>
 
       <Dialog

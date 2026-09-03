@@ -2,8 +2,9 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { ListFilterIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
 export function FiltroFecha() {
@@ -29,41 +30,36 @@ export function FiltroFecha() {
   }
 
   return (
-    <Card>
-      <CardContent className="flex flex-wrap items-end gap-3">
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="filtro-desde" className="text-xs text-muted-foreground">
-            Desde
-          </label>
-          <Input
-            id="filtro-desde"
-            type="date"
-            value={desde}
-            onChange={(evento) => setDesde(evento.target.value)}
-            className="w-40"
-          />
-        </div>
+    <div className="flex flex-wrap items-end gap-3 rounded-xl bg-card p-3 ring-1 ring-border">
+      <Field label="Desde" htmlFor="filtro-desde">
+        <Input
+          id="filtro-desde"
+          type="date"
+          value={desde}
+          onChange={(evento) => setDesde(evento.target.value)}
+          className="w-40"
+        />
+      </Field>
 
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="filtro-hasta" className="text-xs text-muted-foreground">
-            Hasta
-          </label>
-          <Input
-            id="filtro-hasta"
-            type="date"
-            value={hasta}
-            onChange={(evento) => setHasta(evento.target.value)}
-            className="w-40"
-          />
-        </div>
+      <Field label="Hasta" htmlFor="filtro-hasta">
+        <Input
+          id="filtro-hasta"
+          type="date"
+          value={hasta}
+          onChange={(evento) => setHasta(evento.target.value)}
+          className="w-40"
+        />
+      </Field>
 
-        <div className="flex gap-2">
-          <Button onClick={filtrar}>Filtrar</Button>
-          <Button variant="outline" onClick={limpiar}>
-            Limpiar
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+      <div className="ml-auto flex gap-2">
+        <Button size="sm" onClick={filtrar}>
+          <ListFilterIcon strokeWidth={1.75} />
+          Filtrar
+        </Button>
+        <Button variant="ghost" size="sm" onClick={limpiar}>
+          Limpiar
+        </Button>
+      </div>
+    </div>
   );
 }

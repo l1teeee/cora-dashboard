@@ -9,6 +9,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
+import { Alert } from "@/components/ui/alert";
 import {
   formatearCosto,
   formatearDuracion,
@@ -81,10 +83,14 @@ export function DetalleLlamada({
         )}
 
         {estado.tipo === "error" && (
-          <DialogHeader>
-            <DialogTitle>No se pudo mostrar la llamada</DialogTitle>
-            <DialogDescription>{estado.mensaje}</DialogDescription>
-          </DialogHeader>
+          <div className="space-y-4">
+            <DialogHeader>
+              <DialogTitle>No se pudo mostrar la llamada</DialogTitle>
+            </DialogHeader>
+            <Alert variant="destructive" titulo="No se pudo mostrar la llamada">
+              {estado.mensaje}
+            </Alert>
+          </div>
         )}
 
         {estado.tipo === "listo" && <DetalleContenido datos={estado.datos} />}
@@ -95,7 +101,7 @@ export function DetalleLlamada({
 
 function DetalleContenido({ datos }: { datos: LlamadaDetalle }) {
   return (
-    <>
+    <div className="space-y-6">
       <DialogHeader>
         <DialogTitle>{formatearFecha(datos.fecha)}</DialogTitle>
         <DialogDescription>
@@ -103,46 +109,58 @@ function DetalleContenido({ datos }: { datos: LlamadaDetalle }) {
         </DialogDescription>
       </DialogHeader>
 
-      <div className="grid grid-cols-2 gap-4 rounded-lg bg-muted/50 p-3 text-sm sm:grid-cols-4">
-        <div>
+      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg bg-border sm:grid-cols-4">
+        <div className="bg-card p-3">
           <p className="text-xs text-muted-foreground">Duracion</p>
-          <p className="font-medium">{formatearDuracion(datos.duracion)}</p>
+          <p className="text-sm font-medium">{formatearDuracion(datos.duracion)}</p>
         </div>
-        <div>
+        <div className="bg-card p-3">
           <p className="text-xs text-muted-foreground">Costo</p>
-          <p className="font-medium">{formatearCosto(datos.costo)}</p>
+          <p className="text-sm font-medium">{formatearCosto(datos.costo)}</p>
         </div>
-        <div>
+        <div className="bg-card p-3">
           <p className="text-xs text-muted-foreground">Finalizacion</p>
-          <p className="font-medium">{datos.razon_finalizacion ?? "-"}</p>
+          <p className="text-sm font-medium">{datos.razon_finalizacion ?? "-"}</p>
         </div>
-        <div>
+        <div className="bg-card p-3">
           <p className="text-xs text-muted-foreground">Asignado a</p>
-          <p className="font-medium">{datos.usuario_asignado ?? "Sin asignar"}</p>
+          <p className="text-sm font-medium">{datos.usuario_asignado ?? "Sin asignar"}</p>
         </div>
       </div>
 
+      <Separator />
+
       <div>
-        <h3 className="mb-1.5 text-sm font-medium">Resumen</h3>
+        <h3 className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          Resumen
+        </h3>
         <p className="text-sm text-muted-foreground">
           {datos.resumen ?? "El resumen aun no esta disponible."}
         </p>
       </div>
 
+      <Separator />
+
       <div>
-        <h3 className="mb-1.5 text-sm font-medium">Grabacion</h3>
+        <h3 className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          Grabacion
+        </h3>
         <ReproductorGrabacion callId={datos.call_id} />
       </div>
 
+      <Separator />
+
       <div>
-        <h3 className="mb-1.5 text-sm font-medium">Transcripcion</h3>
+        <h3 className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          Transcripcion
+        </h3>
         {datos.transcripcion ? (
           <Transcripcion texto={datos.transcripcion} />
         ) : (
           <p className="text-sm text-muted-foreground">Sin transcripcion</p>
         )}
       </div>
-    </>
+    </div>
   );
 }
 
@@ -150,7 +168,7 @@ function Transcripcion({ texto }: { texto: string }) {
   const lineas = texto.split("\n");
 
   return (
-    <pre className="whitespace-pre-wrap rounded-lg bg-muted p-3 font-sans text-sm leading-relaxed">
+    <pre className="whitespace-pre-wrap rounded-lg bg-muted p-3 font-mono text-xs leading-relaxed max-h-72 overflow-y-auto">
       {lineas.map((linea, indice) => {
         // las lineas vienen como "ETIQUETA: texto" (USUARIO / ASISTENTE); se resalta lo previo a los ":"
         const separador = linea.indexOf(":");
@@ -163,8 +181,8 @@ function Transcripcion({ texto }: { texto: string }) {
 
         return (
           <div key={indice}>
-            <strong>{etiqueta}:</strong>
-            {resto}
+            <strong className="text-foreground">{etiqueta}:</strong>
+            <span className="text-muted-foreground">{resto}</span>
           </div>
         );
       })}

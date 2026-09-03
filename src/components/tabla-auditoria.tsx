@@ -1,8 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ScrollTextIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Field } from "@/components/ui/field";
+import { Alert } from "@/components/ui/alert";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Table,
   TableBody,
@@ -51,8 +55,8 @@ function renderDetalle(detalle: unknown) {
   if (typeof detalle === "string") return detalle;
 
   return (
-    <div className="max-h-40 overflow-y-auto">
-      <pre className="whitespace-pre-wrap text-xs">
+    <div className="max-h-40 overflow-y-auto rounded-lg bg-muted p-2">
+      <pre className="whitespace-pre-wrap font-mono text-xs text-muted-foreground">
         {JSON.stringify(detalle, null, 2)}
       </pre>
     </div>
@@ -101,15 +105,12 @@ export function TablaAuditoria() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-1.5 sm:w-64">
-        <label htmlFor="filtro-accion" className="text-xs text-muted-foreground">
-          Filtrar por accion
-        </label>
+      <Field label="Filtrar por accion" htmlFor="filtro-accion" className="sm:w-64">
         <select
           id="filtro-accion"
           value={filtro}
           onChange={(evento) => setFiltro(evento.target.value)}
-          className="h-8 w-full rounded-md border border-input bg-transparent px-2.5 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          className="h-9 w-full rounded-lg border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
         >
           <option value="">Todas</option>
           {Object.entries(ETIQUETAS_ACCION).map(([valor, etiqueta]) => (
@@ -118,7 +119,7 @@ export function TablaAuditoria() {
             </option>
           ))}
         </select>
-      </div>
+      </Field>
 
       {estado.tipo === "cargando" && (
         <div className="space-y-2">
@@ -129,11 +130,13 @@ export function TablaAuditoria() {
       )}
 
       {estado.tipo === "error" && (
-        <p className="text-sm text-red-600">{estado.mensaje}</p>
+        <Alert variant="destructive" titulo="No se pudo cargar la auditoria">
+          {estado.mensaje}
+        </Alert>
       )}
 
       {estado.tipo === "listo" && (
-        <div className="overflow-x-auto rounded-xl bg-card ring-1 ring-foreground/10">
+        <div className="overflow-x-auto rounded-xl bg-card ring-1 ring-border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -146,14 +149,16 @@ export function TablaAuditoria() {
             <TableBody>
               {registros.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground">
-                    No hay registros de auditoria.
+                  <TableCell colSpan={4} className="h-28 p-0">
+                    <EmptyState icon={ScrollTextIcon} titulo="No hay registros de auditoria." />
                   </TableCell>
                 </TableRow>
               ) : (
                 registros.map((registro) => (
                   <TableRow key={registro.id}>
-                    <TableCell>{formatearFecha(registro.fecha)}</TableCell>
+                    <TableCell className="font-medium text-foreground">
+                      {formatearFecha(registro.fecha)}
+                    </TableCell>
                     <TableCell>{registro.usuario}</TableCell>
                     <TableCell>
                       <Badge variant="outline">{etiquetaAccion(registro.accion)}</Badge>
