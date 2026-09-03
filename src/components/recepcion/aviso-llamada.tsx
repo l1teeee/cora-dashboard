@@ -4,8 +4,14 @@ import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { BellIcon, BellOffIcon, PhoneIcon, PhoneOffIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { MenuTransferir } from "@/components/recepcion/menu-transferir";
 import { cn } from "@/lib/utils";
-import { formatearSegundos, MOTIVOS, type LlamadaActiva } from "@/lib/recepcion-mock";
+import {
+  formatearSegundos,
+  MOTIVOS,
+  type Asignable,
+  type LlamadaActiva,
+} from "@/lib/recepcion-mock";
 
 export function AvisoLlamada({
   llamada,
@@ -13,12 +19,17 @@ export function AvisoLlamada({
   onSilenciar,
   onAceptar,
   onRechazar,
+  asignables,
+  onTransferir,
 }: {
   llamada: LlamadaActiva;
   silenciado: boolean;
   onSilenciar: () => void;
   onAceptar: () => void;
   onRechazar: () => void;
+  /** Solo llegan con rol admin: sin ellas el aviso no ofrece transferir. */
+  asignables?: Asignable[];
+  onTransferir?: (destino: Asignable) => void;
 }) {
   const [segundos, setSegundos] = useState(0);
   const botonAceptarRef = useRef<HTMLButtonElement>(null);
@@ -80,15 +91,25 @@ export function AvisoLlamada({
         </div>
       </div>
 
-      <div className="flex items-center gap-3 border-t border-border p-4">
-        <Button ref={botonAceptarRef} variant="default" className="flex-1" onClick={onAceptar}>
-          <PhoneIcon strokeWidth={1.75} />
-          Aceptar
-        </Button>
-        <Button variant="destructive" className="flex-1" onClick={onRechazar}>
-          <PhoneOffIcon strokeWidth={1.75} />
-          Rechazar
-        </Button>
+      <div className="space-y-2 border-t border-border p-4">
+        <div className="flex items-center gap-3">
+          <Button ref={botonAceptarRef} variant="default" className="flex-1" onClick={onAceptar}>
+            <PhoneIcon strokeWidth={1.75} />
+            Aceptar
+          </Button>
+          <Button variant="destructive" className="flex-1" onClick={onRechazar}>
+            <PhoneOffIcon strokeWidth={1.75} />
+            Rechazar
+          </Button>
+        </div>
+
+        {onTransferir && (
+          <MenuTransferir
+            asignables={asignables ?? []}
+            onTransferir={onTransferir}
+            className="w-full"
+          />
+        )}
       </div>
     </div>
   );

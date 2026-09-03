@@ -30,11 +30,15 @@ export type LlamadaActiva = {
 
 export type EventoTurno = {
   id: string;
-  tipo: "aceptada" | "rechazada" | "perdida";
+  tipo: "aceptada" | "rechazada" | "transferida";
   numero: string;
   /** Tick de la seccion en que ocurrio, para ordenarlos sin relojes reales. */
   tick: number;
+  /** Nombre del agente que la recibio. Solo en las transferidas. */
+  destino?: string;
 };
+
+export type Asignable = { id: string; nombre: string };
 
 export const ESTADOS: Record<
   EstadoAgente,

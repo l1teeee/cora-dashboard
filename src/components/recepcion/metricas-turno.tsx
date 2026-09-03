@@ -6,18 +6,21 @@ import { formatearSegundos } from "@/lib/recepcion-mock";
 export function MetricasTurno({
   atendidas,
   rechazadas,
+  transferidas,
   enCola,
   segundosEnLinea,
 }: {
   atendidas: number;
   rechazadas: number;
+  transferidas: number;
   enCola: number;
   segundosEnLinea: number;
 }) {
   return (
-    <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-border ring-1 ring-border sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-border ring-1 ring-border sm:grid-cols-3 lg:grid-cols-5">
       <Dato etiqueta="Atendidas" valor={String(atendidas)} />
-      <Dato etiqueta="Rechazadas" valor={String(rechazadas)} />
+      <Dato etiqueta="Devueltas a la cola" valor={String(rechazadas)} />
+      <Dato etiqueta="Transferidas" valor={String(transferidas)} />
       <Dato etiqueta="En cola" valor={String(enCola)} />
       <Dato
         etiqueta="Tiempo en linea"

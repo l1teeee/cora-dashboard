@@ -11,9 +11,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { TemaToggle } from "@/components/tema-toggle";
+import { BotonSimularLlamada } from "@/components/recepcion/boton-simular";
 
 const SECCIONES: Record<string, string> = {
   "/dashboard": "Dashboard",
+  "/dashboard/recepcion": "Recepcion",
   "/dashboard/llamadas": "Llamadas",
   "/dashboard/asistente": "Asistente",
   "/dashboard/contactos": "Contactos",
@@ -70,6 +72,8 @@ export function BarraSuperior({
       </div>
 
       <div className="ml-auto flex items-center gap-2">
+        <BotonSimularLlamada />
+        <Separator orientation="vertical" className="hidden h-5 sm:block" />
         <Badge variant="secondary">{rol === "admin" ? "Administrador" : "Agente"}</Badge>
         <span className="hidden text-sm font-medium sm:inline">{usuario}</span>
         <Separator orientation="vertical" className="hidden h-5 sm:block" />

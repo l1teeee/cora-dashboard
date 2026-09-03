@@ -6,10 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
+import { MenuTransferir } from "@/components/recepcion/menu-transferir";
 import {
   esperaDe,
   formatearSegundos,
   MOTIVOS,
+  type Asignable,
   type LlamadaEnCola,
 } from "@/lib/recepcion-mock";
 
@@ -27,10 +29,15 @@ export function ColaLlamadas({
   llamadas,
   tick,
   onAtender,
+  asignables,
+  onTransferir,
 }: {
   llamadas: LlamadaEnCola[];
   tick: number;
   onAtender: (id: string) => void;
+  /** Solo llegan con rol admin: sin ellas las filas no ofrecen transferir. */
+  asignables?: Asignable[];
+  onTransferir?: (id: string, destino: Asignable) => void;
 }) {
   const ordenadas = ordenarCola(llamadas, tick);
 
@@ -83,6 +90,12 @@ export function ColaLlamadas({
                   <Button size="sm" onClick={() => onAtender(llamada.id)}>
                     Atender
                   </Button>
+                  {onTransferir && (
+                    <MenuTransferir
+                      asignables={asignables ?? []}
+                      onTransferir={(destino) => onTransferir(llamada.id, destino)}
+                    />
+                  )}
                 </div>
               </li>
             );

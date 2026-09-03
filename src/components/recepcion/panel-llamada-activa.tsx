@@ -18,7 +18,8 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatearSegundos, type LlamadaActiva } from "@/lib/recepcion-mock";
+import { MenuTransferir } from "@/components/recepcion/menu-transferir";
+import { formatearSegundos, type Asignable, type LlamadaActiva } from "@/lib/recepcion-mock";
 
 const MARGEN = 24;
 const PASO_TECLADO = 20;
@@ -35,9 +36,14 @@ type ArrastreEnCurso = {
 export function PanelLlamadaActiva({
   llamada,
   onColgar,
+  asignables,
+  onTransferir,
 }: {
   llamada: LlamadaActiva;
   onColgar: () => void;
+  /** Solo llegan con rol admin: sin ellas el panel no ofrece transferir. */
+  asignables?: Asignable[];
+  onTransferir?: (destino: Asignable) => void;
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
   const arrastreRef = useRef<ArrastreEnCurso | null>(null);
@@ -182,6 +188,14 @@ export function PanelLlamadaActiva({
             Colgar
           </Button>
         </div>
+
+        {onTransferir && (
+          <MenuTransferir
+            asignables={asignables ?? []}
+            onTransferir={onTransferir}
+            className="mt-2 w-full"
+          />
+        )}
       </div>
     </div>
   );
