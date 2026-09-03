@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BotonLogout } from "@/components/boton-logout";
 import { NavAdmin } from "@/components/nav-admin";
-import { FormAsistente } from "@/components/form-asistente";
-import { PanelConocimiento } from "@/components/panel-conocimiento";
+import { PanelAsistente } from "@/components/panel-asistente";
 
 export default async function Page() {
   const sesion = await auth();
@@ -55,8 +54,7 @@ export default async function Page() {
         <NavAdmin />
 
         <main className="mt-8 space-y-6">
-          <FormAsistente />
-          <PanelConocimiento />
+          <PanelAsistente />
         </main>
       </div>
     </div>

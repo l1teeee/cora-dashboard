@@ -3,7 +3,6 @@ import { auth } from '@/auth'
 import { esAdmin } from '@/lib/solo-admin'
 import { leerAsistente, actualizarAsistente, listarArchivos, subirArchivo } from '@/lib/vapi'
 import { inyectarInstruccionKb } from '@/lib/prompt-kb'
-import { guardarAuditoria } from '@/lib/auditoria'
 
 export const dynamic = 'force-dynamic'
 
@@ -78,20 +77,14 @@ export async function POST(request: Request) {
       )
     }
 
-    const archivoSubido = await subirArchivo(archivo)
+    const usuario = sesion.user.name ?? sesion.user.id
+    const { archivo: archivoSubido, auditoriaRegistrada } = await subirArchivo(archivo, usuario)
 
     const actual = await leerAsistente()
     const promptConKb = inyectarInstruccionKb(actual.systemPrompt)
     if (promptConKb !== actual.systemPrompt) {
-      await actualizarAsistente({ systemPrompt: promptConKb })
+      await actualizarAsistente({ systemPrompt: promptConKb }, usuario)
     }
-
-    const usuario = sesion.user.name ?? sesion.user.id
-    const auditoriaRegistrada = await guardarAuditoria(usuario, 'subio_archivo', {
-      nombre: archivoSubido.nombre,
-      tamano: archivoSubido.tamano,
-      fileId: archivoSubido.id,
-    })
 
     return NextResponse.json({ ok: true, archivo: archivoSubido, auditoriaRegistrada }, { status: 201 })
   } catch (error) {

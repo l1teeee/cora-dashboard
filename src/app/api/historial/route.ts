@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { esAdmin } from '@/lib/solo-admin'
-import { eliminarArchivo } from '@/lib/vapi'
+import { listarHistorial } from '@/lib/vapi'
 
 export const dynamic = 'force-dynamic'
 
-export async function DELETE(request: Request, { params }: { params: Promise<{ fileId: string }> }) {
-  const { fileId } = await params
+export async function GET() {
   const sesion = await auth()
 
   if (!sesion?.user) {
@@ -17,10 +16,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ f
   }
 
   try {
-    const usuario = sesion.user.name ?? sesion.user.id
-    const { auditoriaRegistrada } = await eliminarArchivo(fileId, usuario)
-
-    return NextResponse.json({ ok: true, auditoriaRegistrada })
+    return NextResponse.json(await listarHistorial(20))
   } catch (error) {
     console.error(error)
     return NextResponse.json({ error: error instanceof Error ? error.message : 'Error desconocido' }, { status: 500 })

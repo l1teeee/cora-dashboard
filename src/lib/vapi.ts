@@ -5,6 +5,7 @@ import 'server-only'
 
 export type AsistenteConfig = { id: string; nombre: string; firstMessage: string; systemPrompt: string }
 export type ArchivoKb = { id: string; nombre: string; tamano: number | null; creado: string | null }
+export type Snapshot = { id: number; assistant_id: string; usuario: string; fecha: string; tamano: number }
 
 // El backend devuelve tambien voice/model/analysisPlan, que este dashboard no edita.
 type AsistenteRespuesta = AsistenteConfig & { voice?: unknown; model?: unknown; analysisPlan?: unknown }
@@ -41,13 +42,18 @@ export async function leerAsistente(): Promise<AsistenteConfig> {
   }
 }
 
-export async function actualizarAsistente(cambios: {
-  nombre?: string
-  firstMessage?: string
-  systemPrompt?: string
-}): Promise<void> {
-  const res = await pedir('/vapi/asistente', { method: 'PATCH', body: JSON.stringify(cambios) })
+export async function actualizarAsistente(
+  cambios: { nombre?: string; firstMessage?: string; systemPrompt?: string },
+  usuario: string
+): Promise<{ auditoriaRegistrada: boolean }> {
+  const res = await pedir('/vapi/asistente', {
+    method: 'PATCH',
+    body: JSON.stringify({ ...cambios, usuario }),
+  })
   if (!res.ok) throw new Error(`Backend CORA ${res.status}`)
+
+  const respuesta: { auditoriaRegistrada: boolean } = await res.json()
+  return { auditoriaRegistrada: respuesta.auditoriaRegistrada }
 }
 
 export async function listarArchivos(): Promise<ArchivoKb[]> {
@@ -58,7 +64,10 @@ export async function listarArchivos(): Promise<ArchivoKb[]> {
   return archivos
 }
 
-export async function subirArchivo(archivo: File): Promise<ArchivoKb> {
+export async function subirArchivo(
+  archivo: File,
+  usuario: string
+): Promise<{ archivo: ArchivoKb; auditoriaRegistrada: boolean }> {
   // Reenviar un multipart de un servicio a otro obliga a manejar el boundary a mano;
   // con ficheros de como mucho 300KB el base64 es mas simple y cabe de sobra en el
   // limite de 10MB del backend.
@@ -66,17 +75,42 @@ export async function subirArchivo(archivo: File): Promise<ArchivoKb> {
 
   const res = await pedir('/vapi/archivos', {
     method: 'POST',
-    body: JSON.stringify({ nombre: archivo.name, tipo: archivo.type, base64: bytes }),
+    body: JSON.stringify({ nombre: archivo.name, tipo: archivo.type, base64: bytes, usuario }),
   })
   if (!res.ok) throw new Error(`Backend CORA ${res.status}`)
 
-  const { archivo: archivoSubido }: { ok: boolean; archivo: ArchivoKb } = await res.json()
-  return archivoSubido
+  const respuesta: { ok: boolean; archivo: ArchivoKb; auditoriaRegistrada: boolean } = await res.json()
+  return { archivo: respuesta.archivo, auditoriaRegistrada: respuesta.auditoriaRegistrada }
 }
 
-export async function eliminarArchivo(fileId: string): Promise<void> {
-  const res = await pedir(`/vapi/archivos/${encodeURIComponent(fileId)}`, { method: 'DELETE' })
+export async function eliminarArchivo(fileId: string, usuario: string): Promise<{ auditoriaRegistrada: boolean }> {
+  const res = await pedir(`/vapi/archivos/${encodeURIComponent(fileId)}`, {
+    method: 'DELETE',
+    body: JSON.stringify({ usuario }),
+  })
   if (!res.ok) throw new Error(`Backend CORA ${res.status}`)
+
+  const respuesta: { auditoriaRegistrada: boolean } = await res.json()
+  return { auditoriaRegistrada: respuesta.auditoriaRegistrada }
+}
+
+export async function listarHistorial(limit?: number): Promise<{ data: Snapshot[]; paginacion: unknown }> {
+  const query = limit !== undefined ? `?page=1&limit=${limit}` : ''
+  const res = await pedir(`/vapi/historial${query}`)
+  if (!res.ok) throw new Error(`Backend CORA ${res.status}`)
+
+  return res.json()
+}
+
+export async function revertirA(id: number, usuario: string): Promise<{ revertidoA: number; snapshotPrevioId: number }> {
+  const res = await pedir(`/vapi/historial/${id}/revertir`, {
+    method: 'POST',
+    body: JSON.stringify({ usuario }),
+  })
+  if (!res.ok) throw new Error(`Backend CORA ${res.status}`)
+
+  const respuesta: { ok: boolean; revertidoA: number; snapshotPrevioId: number } = await res.json()
+  return { revertidoA: respuesta.revertidoA, snapshotPrevioId: respuesta.snapshotPrevioId }
 }
 
 // El backend responde con un redirect 302 hacia una URL firmada de vida corta: hay que

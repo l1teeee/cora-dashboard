@@ -3,7 +3,6 @@ import { auth } from '@/auth'
 import { esAdmin } from '@/lib/solo-admin'
 import { leerAsistente, actualizarAsistente } from '@/lib/vapi'
 import { inyectarInstruccionKb, quitarInstruccionKb } from '@/lib/prompt-kb'
-import { guardarAuditoria } from '@/lib/auditoria'
 
 export const dynamic = 'force-dynamic'
 
@@ -59,15 +58,16 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ ok: true, sinCambios: true })
     }
 
-    await actualizarAsistente({
-      nombre: cambios.nombre,
-      firstMessage: cambios.firstMessage,
-      // El bloque de KB tiene que sobrevivir a las ediciones del admin: se reinyecta
-      // aqui en vez de dejar que el admin lo borre sin darse cuenta.
-      systemPrompt: cambios.systemPrompt !== undefined ? inyectarInstruccionKb(cambios.systemPrompt) : undefined,
-    })
-
-    const auditoriaRegistrada = await guardarAuditoria(sesion.user.name ?? sesion.user.id, 'edito_asistente', detalle)
+    const { auditoriaRegistrada } = await actualizarAsistente(
+      {
+        nombre: cambios.nombre,
+        firstMessage: cambios.firstMessage,
+        // El bloque de KB tiene que sobrevivir a las ediciones del admin: se reinyecta
+        // aqui en vez de dejar que el admin lo borre sin darse cuenta.
+        systemPrompt: cambios.systemPrompt !== undefined ? inyectarInstruccionKb(cambios.systemPrompt) : undefined,
+      },
+      sesion.user.name ?? sesion.user.id
+    )
 
     return NextResponse.json({ ok: true, auditoriaRegistrada })
   } catch (error) {
