@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { esAdmin } from '@/lib/solo-admin'
-import { eliminarArchivo, sincronizarKnowledgeBase } from '@/lib/vapi'
+import { eliminarArchivo } from '@/lib/vapi'
 import { guardarAuditoria } from '@/lib/auditoria'
 
 export const dynamic = 'force-dynamic'
@@ -19,7 +19,6 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ f
 
   try {
     await eliminarArchivo(fileId)
-    await sincronizarKnowledgeBase()
 
     const usuario = sesion.user.name ?? sesion.user.id
     const auditoriaRegistrada = await guardarAuditoria(usuario, 'elimino_archivo', { fileId })

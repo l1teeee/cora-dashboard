@@ -70,6 +70,11 @@ entre por la URL directa recibe 403, no un redirect: las API routes responden
 `403 { error: 'Solo administradores' }` y las paginas renderizan una tarjeta de acceso denegado.
 Ocultar el enlace del menu no es una medida de seguridad, solo de ergonomia.
 
+El dashboard no habla con Vapi directamente: leer y editar el asistente, subir o borrar
+archivos de la base de conocimiento, y obtener la grabacion de una llamada pasan todos por el
+backend de CORA en Railway (`RAILWAY_BACKEND_URL` + `x-admin-key`). La private key de Vapi vive
+unicamente ahi. Un unico dueño de la credencial.
+
 ### `/dashboard/asistente`
 
 Lee la configuracion actual del asistente de Vapi y permite editar nombre, primer mensaje y
@@ -120,8 +125,6 @@ que haria creer al admin que su cambio no se aplico.
 | `NEXTAUTH_SECRET` | Firma la sesion. Genera uno con `openssl rand -base64 32` |
 | `ADMIN_USUARIO` / `ADMIN_PASSWORD` | Credenciales del admin |
 | `AGENTE_USUARIO` / `AGENTE_PASSWORD` | Credenciales del agente. El usuario debe coincidir con `usuario_asignado` |
-| `VAPI_PRIVATE_KEY` | Vapi -> Organization Settings -> API Keys -> **Private Key**. Da control total sobre el asistente: solo servidor |
-| `VAPI_ASSISTANT_ID` | Opcional. Si falta, se usa el primer asistente que devuelva `GET /assistant` |
 
 Ninguna lleva `NEXT_PUBLIC_`.
 

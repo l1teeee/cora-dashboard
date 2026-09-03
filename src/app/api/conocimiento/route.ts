@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { esAdmin } from '@/lib/solo-admin'
-import { leerAsistente, actualizarAsistente, listarArchivos, subirArchivo, sincronizarKnowledgeBase } from '@/lib/vapi'
+import { leerAsistente, actualizarAsistente, listarArchivos, subirArchivo } from '@/lib/vapi'
 import { inyectarInstruccionKb } from '@/lib/prompt-kb'
 import { guardarAuditoria } from '@/lib/auditoria'
 
@@ -79,7 +79,6 @@ export async function POST(request: Request) {
     }
 
     const archivoSubido = await subirArchivo(archivo)
-    await sincronizarKnowledgeBase()
 
     const actual = await leerAsistente()
     const promptConKb = inyectarInstruccionKb(actual.systemPrompt)
