@@ -127,6 +127,30 @@ function mapearArchivo(a: VapiFile): ArchivoKb {
   }
 }
 
+// Vapi guarda las grabaciones en un bucket privado: la url_grabacion de nuestra base ya no es
+// accesible. Este endpoint responde 302 hacia una URL firmada de vida corta, asi que hay que
+// interceptar el redirect (redirect: 'manual') en vez de dejar que fetch lo siga.
+export async function obtenerUrlGrabacion(callId: string): Promise<string | null> {
+  const apiKey = process.env.VAPI_PRIVATE_KEY
+
+  if (!apiKey) throw new Error('Falta la variable de entorno VAPI_PRIVATE_KEY')
+
+  const res = await fetch(`https://api.vapi.ai/call/${encodeURIComponent(callId)}/stereo-recording`, {
+    headers: { Authorization: `Bearer ${apiKey}` },
+    redirect: 'manual',
+    cache: 'no-store',
+  })
+
+  if (res.status === 302 || res.status === 301 || res.status === 307) {
+    return res.headers.get('location')
+  }
+
+  // 401/403/404: la grabacion no existe o no hay permiso. No es un fallo del servidor.
+  if (res.status === 401 || res.status === 403 || res.status === 404) return null
+
+  throw new Error(`Vapi ${res.status} al pedir la grabacion`)
+}
+
 export async function listarArchivos(): Promise<ArchivoKb[]> {
   const archivos = await pedirVapi<VapiFile[]>('/file')
   return archivos.map(mapearArchivo)

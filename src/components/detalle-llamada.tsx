@@ -15,6 +15,7 @@ import {
   formatearFecha,
 } from "@/lib/metricas";
 import type { LlamadaDetalle } from "@/lib/tipos";
+import { ReproductorGrabacion } from "@/components/reproductor-grabacion";
 
 type Estado =
   | { tipo: "cargando" }
@@ -130,11 +131,7 @@ function DetalleContenido({ datos }: { datos: LlamadaDetalle }) {
 
       <div>
         <h3 className="mb-1.5 text-sm font-medium">Grabacion</h3>
-        {datos.url_grabacion ? (
-          <audio controls src={datos.url_grabacion} className="w-full" />
-        ) : (
-          <p className="text-sm text-muted-foreground">Sin grabacion</p>
-        )}
+        <ReproductorGrabacion callId={datos.call_id} />
       </div>
 
       <div>
