@@ -75,12 +75,16 @@
 .panel-widget-quitar {
   position: absolute;
   z-index: 32;
-  top: -0.55rem;
-  left: -0.55rem;
-  display: grid;
+  /* El canto visible de la tarjeta esta metido hacia adentro por el radio, asi
+     que centrar en la esquina de la caja deja el boton flotando en el vacio. */
+  top: -0.25rem;
+  left: -0.25rem;
+  display: flex;
   width: 1.5rem;
   height: 1.5rem;
-  place-items: center;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
   border: 1px solid color-mix(in srgb, var(--destructive) 35%, transparent);
   border-radius: 999px;
   background: var(--card);
@@ -139,6 +143,63 @@
   outline: 3px solid var(--primary);
   outline-offset: 4px;
   box-shadow: 0 0 0 8px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+.panel-widget-frame-nuevo {
+  animation: widgetNuevo 1300ms ease-out 2;
+  border-radius: 1.25rem;
+}
+
+@keyframes widgetNuevo {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 55%, transparent);
+  }
+  60% {
+    box-shadow: 0 0 0 12px color-mix(in srgb, var(--primary) 0%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 0%, transparent);
+  }
+}
+
+.panel-widget-frame-nuevo::after {
+  position: absolute;
+  z-index: 33;
+  top: -0.7rem;
+  right: 1rem;
+  border-radius: 999px;
+  background: var(--primary);
+  padding: 0.15rem 0.5rem;
+  color: var(--primary-foreground);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  content: 'Nuevo';
+  animation: etiquetaNueva 2600ms ease-out forwards;
+}
+
+@keyframes etiquetaNueva {
+  0%,
+  75% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-0.3rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-widget-frame-nuevo {
+    animation: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 45%, transparent);
+  }
+
+  .panel-widget-frame-nuevo::after {
+    animation: none;
+  }
 }
 
 .panel-widget-grid-editando .react-grid-item.react-draggable-dragging .panel-widget-frame-editando {

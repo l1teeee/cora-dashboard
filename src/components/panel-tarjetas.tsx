@@ -33,6 +33,15 @@ export type { Widget };
 
 const ESPERA_GUARDADO_REMOTO_MS = 800;
 
+// Lo que dura el resalte del widget recien agregado: suficiente para encontrarlo
+// con la vista despues del scroll, corto para no quedarse parpadeando.
+const DURACION_RESALTE_MS = 2600;
+
+// react-grid-layout anima la posicion de cada tarjeta 200ms (css/styles.css). Antes
+// de que termine, el nodo todavia mide desde su posicion vieja y el scroll apunta
+// al lugar equivocado.
+const ESPERA_COLOCACION_MS = 260;
+
 const configuracionGrid = {
   cols: PANEL_COLUMNAS,
   rowHeight: PANEL_ALTO_FILA,
@@ -77,6 +86,7 @@ export function PanelTarjetas({
   const [anuncio, setAnuncio] = useState("");
   const [editando, setEditando] = useState(false);
   const [seleccionado, setSeleccionado] = useState<string | null>(null);
+  const [recienAgregado, setRecienAgregado] = useState<string | null>(null);
   const envioPendiente = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const esEscritorio = mounted && width >= PANEL_ANCHO_MINIMO_ESCRITORIO;
@@ -186,10 +196,30 @@ export function PanelTarjetas({
     (widgetId: string) => {
       persistirLayout(agregarWidget(panel, layout, widgetId));
       setSeleccionado(widgetId);
-      setAnuncio(`${panel.etiquetas[widgetId] ?? widgetId} se agrego al final del panel.`);
+      setRecienAgregado(widgetId);
+      setAnuncio(`${panel.etiquetas[widgetId] ?? widgetId} se agrego al panel.`);
     },
     [layout, panel, persistirLayout]
   );
+
+  // El widget entra al final del panel, casi siempre fuera de pantalla. La rejilla
+  // es duena del ref de cada tarjeta, asi que aqui se busca el nodo por su atributo
+  // en vez de disputarle esa referencia.
+  useEffect(() => {
+    if (!recienAgregado) return;
+
+    const colocacion = setTimeout(() => {
+      const nodo = document.querySelector(`[data-widget-id="${recienAgregado}"]`);
+      nodo?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, ESPERA_COLOCACION_MS);
+
+    const temporizador = setTimeout(() => setRecienAgregado(null), DURACION_RESALTE_MS);
+
+    return () => {
+      clearTimeout(colocacion);
+      clearTimeout(temporizador);
+    };
+  }, [recienAgregado]);
 
   const hijos = useMemo(
     () =>
@@ -202,6 +232,7 @@ export function PanelTarjetas({
             etiqueta={panel.etiquetas[widget.id] ?? widget.id}
             editando={editando}
             seleccionado={seleccionado === widget.id}
+            esNuevo={recienAgregado === widget.id}
             medida={item ? { ancho: item.w, alto: item.h } : undefined}
             idAyuda={`${panel.clave}-ayuda`}
             onSeleccionar={() => setSeleccionado(widget.id)}
@@ -210,7 +241,17 @@ export function PanelTarjetas({
           />
         );
       }),
-    [alTeclear, editando, layout, panel.clave, panel.etiquetas, quitar, seleccionado, visibles]
+    [
+      alTeclear,
+      editando,
+      layout,
+      panel.clave,
+      panel.etiquetas,
+      quitar,
+      recienAgregado,
+      seleccionado,
+      visibles,
+    ]
   );
 
   function restablecer() {

@@ -29,9 +29,10 @@ export async function guardarLayoutRemoto(panel: string, items: ItemLayout[]): P
       body: JSON.stringify({ items }),
     })
 
-    // Un 501 es el estado normal hasta que exista el endpoint en el backend; el
-    // resto de codigos si son un problema real y tienen que quedar en la consola.
-    if (!res.ok && res.status !== 501) {
+    // 501 mientras el backend no tenga donde guardar, 401 cuando la sesion vencio
+    // con la pestana abierta. Ninguno es un fallo: el panel sigue con su copia
+    // local. El resto de codigos si son un problema y tienen que verse.
+    if (!res.ok && res.status !== 501 && res.status !== 401) {
       console.error(`No se pudo guardar el layout en el servidor: ${res.status}`)
     }
   } catch (error) {

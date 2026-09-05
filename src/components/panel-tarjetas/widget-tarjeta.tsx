@@ -12,6 +12,7 @@ type WidgetTarjetaProps = {
   seleccionado: boolean;
   medida?: { ancho: number; alto: number };
   idAyuda?: string;
+  esNuevo: boolean;
   onSeleccionar: () => void;
   onQuitar: () => void;
   onTeclear: (evento: KeyboardEvent<HTMLDivElement>) => void;
@@ -24,6 +25,7 @@ export function WidgetTarjeta({
   seleccionado,
   medida,
   idAyuda,
+  esNuevo,
   onSeleccionar,
   onQuitar,
   onTeclear,
@@ -33,6 +35,10 @@ export function WidgetTarjeta({
   ref,
   className,
   style,
+  // react-resizable clona el mismo elemento y mete los cuatro tiradores en sus
+  // children. Sin renderizarlos la tarjeta se coloca y se arrastra, pero no hay
+  // por donde cambiarle el tamano.
+  children,
   ...resto
 }: WidgetTarjetaProps) {
   return (
@@ -45,6 +51,7 @@ export function WidgetTarjeta({
         "panel-widget-frame group relative h-full",
         editando && "panel-widget-frame-editando",
         seleccionado && "panel-widget-frame-seleccionado",
+        esNuevo && "panel-widget-frame-nuevo",
         className
       )}
       onPointerDown={() => {
@@ -91,6 +98,7 @@ export function WidgetTarjeta({
       >
         {widget.contenido}
       </div>
+      {children}
     </div>
   );
 }
