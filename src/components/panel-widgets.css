@@ -1,43 +1,75 @@
 /* Fuera de edicion el panel solo muestra el lapiz: el aviso permanente ocupaba
-   una franja entera del dashboard para explicar algo que se descubre al usarlo. */
-.panel-barra-edicion {
+   una franja entera del dashboard para explicar algo que se descubre al usarlo.
+   En edicion la barra flota sobre el contenido en vez de empujarlo, asi sigue a
+   la mano aunque el usuario haya bajado hasta la ultima tarjeta. */
+.panel-barra-flotante {
+  position: fixed;
+  z-index: 40;
+  bottom: 1.5rem;
+  left: 50%;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
-  border: 1px solid color-mix(in srgb, var(--primary) 45%, var(--border));
+  gap: 0.25rem;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--primary) 6%, var(--card));
-  padding: 0.35rem 0.4rem 0.35rem 0.85rem;
-  box-shadow: 0 1px 2px rgb(18 20 22 / 5%);
+  background: var(--sidebar);
+  padding: 0.375rem;
+  color: var(--sidebar-foreground);
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, oklch(1 0 0) 10%, transparent),
+    0 8px 20px -6px rgb(0 0 0 / 35%),
+    0 24px 48px -20px rgb(0 0 0 / 45%);
+  transform: translateX(-50%);
+  animation: barraFlotanteEntra 220ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.panel-barra-edicion-estado {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  font-size: 0.8125rem;
-  font-weight: 600;
-}
-
-.panel-barra-edicion-estado::before {
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 999px;
-  background: var(--primary);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 22%, transparent);
-  content: '';
-}
-
-.panel-barra-edicion-copy {
-  color: var(--muted-foreground);
-  font-size: 0.75rem;
-}
-
-@media (max-width: 1100px) {
-  .panel-barra-edicion-copy {
-    display: none;
+@keyframes barraFlotanteEntra {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 0.75rem);
   }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-barra-flotante {
+    animation: none;
+  }
+}
+
+/* Los botones del sistema estan pensados para fondo claro; sobre la barra oscura
+   necesitan su propio juego de estados. */
+.panel-barra-flotante-accion {
+  color: color-mix(in oklab, var(--sidebar-foreground) 78%, transparent);
+}
+
+.panel-barra-flotante-accion:hover:not(:disabled) {
+  background: oklch(1 0 0 / 10%);
+  color: var(--sidebar-foreground);
+}
+
+.panel-barra-flotante-accion[aria-expanded='true'] {
+  background: oklch(1 0 0 / 12%);
+  color: var(--sidebar-foreground);
+}
+
+.panel-barra-flotante-cuenta {
+  min-width: 1.125rem;
+  border-radius: 999px;
+  background: oklch(1 0 0 / 14%);
+  padding: 0 0.3rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.125rem;
+}
+
+.panel-barra-flotante-division {
+  width: 1px;
+  height: 1.25rem;
+  margin: 0 0.25rem;
+  background: oklch(1 0 0 / 14%);
 }
 
 .panel-widget-quitar {
@@ -69,6 +101,9 @@
 }
 
 .panel-widget-grid-editando {
+  /* Margen y no padding: react-grid-layout fija el alto en linea y el padding se
+     lo comeria. Deja que la ultima fila pase por debajo de la barra flotante. */
+  margin-bottom: 4.5rem;
   /* El alto adicional deja filas vacias para reubicar tarjetas. */
   border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
   border-radius: 1.75rem;

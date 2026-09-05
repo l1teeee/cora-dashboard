@@ -42,46 +42,63 @@ export function BarraPersonalizacion({
 }: BarraPersonalizacionProps) {
   return (
     <TooltipProvider delay={250} closeDelay={0}>
-      <div className="flex items-center justify-end gap-2">
+      <div className="flex items-center justify-end">
         {editando ? (
-          <div className="panel-barra-edicion">
-            <span className="panel-barra-edicion-estado">Edicion activa</span>
-            <p id={idAyuda} className="panel-barra-edicion-copy">
-              Arrastra para mover, usa los puntos laterales para redimensionar y la X
-              para quitar.
+          <>
+            {/* La ayuda deja de ocupar una franja del dashboard: los gestos se
+                descubren al usarlos, pero aria-describedby sigue necesitandola. */}
+            <p id={idAyuda} className="sr-only">
+              Arrastra una tarjeta para moverla, usa los puntos laterales para
+              cambiar su tamano y la X para quitarla del panel.
             </p>
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={
-                  <Button variant="ghost" size="sm" disabled={ocultos.length === 0} />
-                }
+
+            <div className="panel-barra-flotante" role="toolbar" aria-label="Personalizar panel">
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="panel-barra-flotante-accion"
+                      disabled={ocultos.length === 0}
+                    />
+                  }
+                >
+                  <PlusIcon strokeWidth={1.75} />
+                  Agregar
+                  {ocultos.length > 0 && (
+                    <span className="panel-barra-flotante-cuenta">{ocultos.length}</span>
+                  )}
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" side="top" sideOffset={10}>
+                  {ocultos.map((widgetId) => (
+                    <DropdownMenuItem key={widgetId} onClick={() => onAgregar(widgetId)}>
+                      <PlusIcon strokeWidth={1.75} />
+                      {etiquetas[widgetId] ?? widgetId}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <Button
+                size="sm"
+                variant="ghost"
+                className="panel-barra-flotante-accion"
+                disabled={!hayLayoutPropio}
+                onClick={onRestablecer}
               >
-                <PlusIcon strokeWidth={1.75} />
-                Agregar
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {ocultos.map((widgetId) => (
-                  <DropdownMenuItem key={widgetId} onClick={() => onAgregar(widgetId)}>
-                    <PlusIcon strokeWidth={1.75} />
-                    {etiquetas[widgetId] ?? widgetId}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <Button
-              variant="ghost"
-              size="sm"
-              disabled={!hayLayoutPropio}
-              onClick={onRestablecer}
-            >
-              <RotateCcwIcon strokeWidth={1.75} />
-              Restablecer
-            </Button>
-            <Button size="sm" onClick={onTerminar}>
-              <CheckIcon strokeWidth={1.75} />
-              Listo
-            </Button>
-          </div>
+                <RotateCcwIcon strokeWidth={1.75} />
+                Restablecer
+              </Button>
+
+              <span className="panel-barra-flotante-division" aria-hidden="true" />
+
+              <Button size="sm" onClick={onTerminar}>
+                <CheckIcon strokeWidth={1.75} />
+                Listo
+              </Button>
+            </div>
+          </>
         ) : (
           <Tooltip>
             <TooltipTrigger

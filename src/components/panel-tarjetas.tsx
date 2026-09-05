@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { KeyboardEvent, Ref } from "react";
 import { GridLayout, useContainerWidth } from "react-grid-layout";
 import type { Layout, LayoutItem, ResizeHandleAxis } from "react-grid-layout";
@@ -16,6 +16,7 @@ import {
   agregarWidget,
   cargarLayout,
   esLayoutPorDefecto,
+  restaurarLayout,
   guardarLayout,
   quitarWidget,
   restablecerLayout,
@@ -26,8 +27,11 @@ import {
   PANEL_ESPACIO,
   type DefinicionPanel,
 } from "@/lib/panel-layout";
+import { guardarLayoutRemoto, leerLayoutRemoto } from "@/lib/sincronizar-layout";
 
 export type { Widget };
+
+const ESPERA_GUARDADO_REMOTO_MS = 800;
 
 const configuracionGrid = {
   cols: PANEL_COLUMNAS,
@@ -73,6 +77,7 @@ export function PanelTarjetas({
   const [anuncio, setAnuncio] = useState("");
   const [editando, setEditando] = useState(false);
   const [seleccionado, setSeleccionado] = useState<string | null>(null);
+  const envioPendiente = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const esEscritorio = mounted && width >= PANEL_ANCHO_MINIMO_ESCRITORIO;
   const hayLayoutPropio = !esLayoutPorDefecto(panel, layout);
@@ -86,9 +91,22 @@ export function PanelTarjetas({
   }, [layout, widgets]);
 
   // localStorage no existe en el render del servidor: se lee tras el montaje para
-  // no romper la hidratacion.
+  // no romper la hidratacion. La copia del servidor llega despues y pisa a la
+  // local, que es la que hace que el panel pinte sin esperar a la red.
   useEffect(() => {
     setLayout(cargarLayout(panel, obtenerAlmacen()));
+
+    let vigente = true;
+    leerLayoutRemoto(panel.clave).then((items) => {
+      if (!vigente || !items) return;
+
+      const restaurado = restaurarLayout(panel, items);
+      if (restaurado) setLayout(restaurado);
+    });
+
+    return () => {
+      vigente = false;
+    };
   }, [panel]);
 
   useEffect(() => {
@@ -103,9 +121,23 @@ export function PanelTarjetas({
       const normalizado = siguiente.map((item) => ({ ...item }));
       setLayout(normalizado);
       guardarLayout(panel, normalizado, obtenerAlmacen());
+
+      // Cada arrastre y cada tecla llaman aqui: sin la espera, mover una tarjeta
+      // dispararia una peticion por fotograma del gesto.
+      if (envioPendiente.current) clearTimeout(envioPendiente.current);
+      envioPendiente.current = setTimeout(() => {
+        guardarLayoutRemoto(
+          panel.clave,
+          normalizado.map(({ i, x, y, w, h }) => ({ i, x, y, w, h }))
+        );
+      }, ESPERA_GUARDADO_REMOTO_MS);
     },
     [panel]
   );
+
+  useEffect(() => () => {
+    if (envioPendiente.current) clearTimeout(envioPendiente.current);
+  }, []);
 
   const alCambiarLayout = useCallback((siguiente: Layout) => {
     // Mantiene la previsualizacion fluida; el guardado ocurre al soltar el gesto.

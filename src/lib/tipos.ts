@@ -53,3 +53,5 @@ export type MetricasOperacion = {
 export type PuntoGrafica = { etiqueta: string; valor: number }
 
 export type DesgloseFinalizacion = { razon: string; cantidad: number }
+
+export type ItemLayout = { i: string; x: number; y: number; w: number; h: number }

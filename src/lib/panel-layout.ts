@@ -3,6 +3,7 @@
 // dependiendo del arbol de componentes.
 import { moveElement, verticalCompactor } from 'react-grid-layout/core'
 import type { Layout, LayoutItem } from 'react-grid-layout/core'
+import type { ItemLayout } from './tipos'
 
 export const PANEL_COLUMNAS = 12
 export const PANEL_ALTO_FILA = 24
@@ -31,7 +32,7 @@ export type AccionLayout =
 // estan visibles.
 type LayoutGuardado = {
   version: 2
-  items: Array<Pick<LayoutItem, 'i' | 'x' | 'y' | 'w' | 'h'>>
+  items: ItemLayout[]
 }
 
 type AlmacenLectura = Pick<Storage, 'getItem'>
@@ -93,6 +94,10 @@ function restaurarConLimites(
   }
 
   return verticalCompactor.compact(restaurado, PANEL_COLUMNAS).map((item) => ({ ...item }))
+}
+
+export function restaurarLayout(panel: DefinicionPanel, items: ItemLayout[]): LayoutItem[] | null {
+  return restaurarConLimites(panel, items)
 }
 
 export function cargarLayout(panel: DefinicionPanel, almacen?: AlmacenLectura): LayoutItem[] {
@@ -243,14 +248,12 @@ export const PANEL_ADMIN: DefinicionPanel = {
     'duracion-rangos': 'Duracion por rangos',
     'dia-semana': 'Llamadas por dia de la semana',
   },
+  // Tres cifras, tres graficas y la tabla. El resto del catalogo existe pero se
+  // agrega a mano: el panel abria con once tarjetas y no se leia ninguna.
   visiblesPorDefecto: [
     'total',
     'exito',
     'duracion',
-    'costo',
-    'transferencias',
-    'sin-asignar',
-    'recurrentes',
     'por-hora',
     'carga',
     'finalizacion',
