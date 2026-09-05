@@ -6,7 +6,12 @@ import { usePathname } from "next/navigation"
 import type { LucideIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { Separator } from "@/components/ui/separator"
+import {
+  Tooltip,
+  TooltipProvider,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip"
 
 export type ItemNav = {
   href: string
@@ -104,6 +109,81 @@ function SidebarFooter({ className, children }: React.ComponentProps<"div">) {
   )
 }
 
+function SeparadorGrupo() {
+  return (
+    <div
+      role="separator"
+      aria-orientation="horizontal"
+      className="mx-auto my-3 h-px w-8 bg-linear-to-r from-transparent via-sidebar-foreground/25 to-transparent"
+    />
+  )
+}
+
+function EnlaceNav({
+  item,
+  activo,
+  colapsada,
+}: {
+  item: ItemNav
+  activo: boolean
+  colapsada: boolean
+}) {
+  const clases = cn(
+    "flex min-h-10 items-center gap-2.5 rounded-xl px-3 py-2 text-[13px] transition-[background-color,color,transform] duration-150 ease-out select-none",
+    "outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar",
+    activo
+      ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold shadow-[0_1px_3px_rgb(0_0_0_/_0.25)]"
+      : "text-sidebar-foreground/62 hover:translate-x-0.5 hover:bg-white/8 hover:text-sidebar-foreground",
+    colapsada && "justify-center px-0 hover:translate-x-0"
+  )
+
+  const contenido = (
+    <>
+      <item.icon className="size-4 shrink-0" strokeWidth={1.75} />
+      {colapsada ? (
+        <span className="sr-only">{item.etiqueta}</span>
+      ) : (
+        <span className="truncate">{item.etiqueta}</span>
+      )}
+      {item.badge !== undefined && !colapsada && (
+        <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-sidebar-primary px-1.5 text-[10px] font-semibold text-sidebar-primary-foreground">
+          {item.badge}
+        </span>
+      )}
+    </>
+  )
+
+  if (!colapsada) {
+    return (
+      <Link href={item.href} aria-current={activo ? "page" : undefined} className={clases}>
+        {contenido}
+      </Link>
+    )
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Link href={item.href} aria-current={activo ? "page" : undefined} className={clases} />
+        }
+      >
+        {contenido}
+      </TooltipTrigger>
+      <TooltipContent
+        side="right"
+        sideOffset={10}
+        className="bg-sidebar-accent text-sidebar-accent-foreground ring-black/10 shadow-[0_8px_24px_rgb(0_0_0_/_0.35)]"
+      >
+        {item.etiqueta}
+        {item.badge !== undefined && (
+          <span className="ml-1.5 opacity-55">{item.badge}</span>
+        )}
+      </TooltipContent>
+    </Tooltip>
+  )
+}
+
 function SidebarNav({
   grupos,
   colapsada = false,
@@ -116,52 +196,31 @@ function SidebarNav({
   const pathname = usePathname()
 
   return (
-    <nav data-slot="sidebar-nav" className={cn("flex flex-col gap-6", className)}>
-      {grupos.map((grupo, indice) => {
-        if (grupo.items.length === 0) return null
-        return (
-          <div key={grupo.titulo ?? indice} className="flex flex-col gap-1">
-            {grupo.titulo && !colapsada && (
-              <span className="px-2.5 mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-sidebar-foreground/45">
-                {grupo.titulo}
-              </span>
-            )}
-            {grupo.titulo && colapsada && <Separator className="my-2" />}
-            {grupo.items.map((item) => {
-              const activo = pathname === item.href
-              return (
-                <Link
+    <TooltipProvider delay={250} closeDelay={0}>
+      <nav data-slot="sidebar-nav" className={cn("flex flex-col gap-6", className)}>
+        {grupos.map((grupo, indice) => {
+          if (grupo.items.length === 0) return null
+          return (
+            <div key={grupo.titulo ?? indice} className="flex flex-col gap-1">
+              {grupo.titulo && !colapsada && (
+                <span className="px-2.5 mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-sidebar-foreground/45">
+                  {grupo.titulo}
+                </span>
+              )}
+              {grupo.titulo && colapsada && <SeparadorGrupo />}
+              {grupo.items.map((item) => (
+                <EnlaceNav
                   key={item.href}
-                  href={item.href}
-                  aria-current={activo ? "page" : undefined}
-                  title={colapsada ? item.etiqueta : undefined}
-                  className={cn(
-                    "flex min-h-10 items-center gap-2.5 rounded-xl px-3 py-2 text-[13px] transition-[background-color,color,transform] duration-150 ease-out select-none",
-                    "outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar",
-                    activo
-                      ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold shadow-[0_1px_3px_rgb(0_0_0_/_0.25)]"
-                      : "text-sidebar-foreground/62 hover:translate-x-0.5 hover:bg-white/8 hover:text-sidebar-foreground",
-                    colapsada && "justify-center px-0 hover:translate-x-0"
-                  )}
-                >
-                  <item.icon className="size-4 shrink-0" strokeWidth={1.75} />
-                  {colapsada ? (
-                    <span className="sr-only">{item.etiqueta}</span>
-                  ) : (
-                    <span className="truncate">{item.etiqueta}</span>
-                  )}
-                  {item.badge !== undefined && !colapsada && (
-                    <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-sidebar-primary px-1.5 text-[10px] font-semibold text-sidebar-primary-foreground">
-                      {item.badge}
-                    </span>
-                  )}
-                </Link>
-              )
-            })}
-          </div>
-        )
-      })}
-    </nav>
+                  item={item}
+                  activo={pathname === item.href}
+                  colapsada={colapsada}
+                />
+              ))}
+            </div>
+          )
+        })}
+      </nav>
+    </TooltipProvider>
   )
 }
 
