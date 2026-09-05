@@ -33,7 +33,7 @@ export function FiltroFecha() {
   }
 
   return (
-    <div className="flex w-full flex-col gap-3 rounded-2xl bg-card p-4 shadow-[0_2px_8px_-2px_rgb(18_20_22_/_0.08),0_1px_2px_rgb(18_20_22_/_0.04)] ring-1 ring-border sm:flex-row sm:flex-wrap sm:items-end xl:w-auto xl:flex-nowrap">
+    <div className="flex w-full flex-col gap-3 superficie p-4 sm:flex-row sm:flex-wrap sm:items-end xl:w-auto xl:flex-nowrap">
       <Field label="Desde" htmlFor="filtro-desde">
         <Input
           id="filtro-desde"

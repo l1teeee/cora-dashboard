@@ -56,13 +56,13 @@ export default async function Page({
 
         <ContenidoActualizable>
           {error ? (
-            <div className="rounded-3xl bg-card p-4 shadow-sm ring-1 ring-border sm:p-6">
+            <div className="superficie p-4 sm:p-6">
               <Alert variant="destructive" titulo="No se pudo conectar con el backend de CORA">
                 {error}
               </Alert>
             </div>
           ) : sinLlamadasAsignadas ? (
-            <div className="rounded-3xl bg-card shadow-sm ring-1 ring-border">
+            <div className="superficie">
               <EmptyState
                 icon={PhoneOffIcon}
                 titulo="No tienes llamadas asignadas todavia."

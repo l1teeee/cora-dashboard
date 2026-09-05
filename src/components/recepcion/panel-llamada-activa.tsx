@@ -133,7 +133,7 @@ export function PanelLlamadaActiva({
       ref={panelRef}
       role="region"
       aria-label="Llamada en curso"
-      className="fixed z-50 w-72 rounded-3xl bg-card ring-1 ring-border shadow-[0_24px_48px_-16px_rgb(18_20_22_/_0.35)]"
+      className="fixed z-50 w-72 superficie"
       style={posicion ? { left: posicion.x, top: posicion.y } : { left: 0, top: 0, visibility: "hidden" }}
     >
       {/* El arrastre nace solo aqui, nunca en los botones de abajo, para que un clic en

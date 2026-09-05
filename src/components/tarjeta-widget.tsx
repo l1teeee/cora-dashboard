@@ -21,7 +21,7 @@ export function TarjetaWidget({
   return (
     <div
       className={cn(
-        "flex h-full flex-col overflow-hidden rounded-2xl bg-card text-sm text-card-foreground shadow-[0_2px_8px_-2px_rgb(18_20_22_/_0.08),0_1px_2px_rgb(18_20_22_/_0.04)] ring-1 ring-border",
+        "superficie flex h-full flex-col overflow-hidden text-sm text-card-foreground",
         className
       )}
     >

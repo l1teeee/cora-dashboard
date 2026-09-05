@@ -237,7 +237,7 @@ export function PanelConocimiento() {
         )}
 
         {estado.tipo === "listo" && (
-          <div className="overflow-x-auto rounded-[1.125rem] bg-card ring-1 ring-border">
+          <div className="superficie overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>

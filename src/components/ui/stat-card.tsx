@@ -2,7 +2,8 @@ import type * as React from "react"
 import type { LucideIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { Sparkline } from "@/components/ui/sparkline"
+import { SparklineDiferida } from "@/components/ui/sparkline-diferida"
+import type { PuntoGrafica } from "@/lib/tipos"
 
 function StatCard({
   etiqueta,
@@ -10,20 +11,22 @@ function StatCard({
   icon: Icon,
   detalle,
   serie,
+  unidadSerie,
   className,
 }: {
   etiqueta: string
   valor: React.ReactNode
   icon?: LucideIcon
   detalle?: string
-  serie?: number[]
+  serie?: PuntoGrafica[]
+  unidadSerie?: string
   className?: string
 }) {
   return (
     <div
       data-slot="stat-card"
       className={cn(
-        "h-full overflow-hidden rounded-2xl bg-card p-5 shadow-[0_2px_8px_-2px_rgb(18_20_22_/_0.08),0_1px_2px_rgb(18_20_22_/_0.04)] ring-1 ring-border flex flex-col gap-2.5 transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_12px_28px_-10px_rgb(18_20_22_/_0.16)]",
+        "superficie superficie-interactiva h-full overflow-hidden p-5 flex flex-col gap-2.5",
         className
       )}
     >
@@ -46,7 +49,7 @@ function StatCard({
           empujada fuera del borde inferior y recortada. */}
       {serie ? (
         <div className="mt-1 min-h-0 flex-1">
-          <Sparkline datos={serie} />
+          <SparklineDiferida datos={serie} unidad={unidadSerie} />
         </div>
       ) : null}
     </div>

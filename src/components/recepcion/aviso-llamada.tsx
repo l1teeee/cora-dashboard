@@ -59,7 +59,7 @@ export function AvisoLlamada({
       onKeyDown={manejarTecla}
       className={cn(
         "fixed bottom-6 right-6 z-50 w-[22rem] max-w-[calc(100vw-3rem)]",
-        "rounded-3xl bg-card ring-1 ring-border shadow-[0_24px_48px_-16px_rgb(18_20_22_/_0.35)]",
+        "superficie",
         "animate-element motion-reduce:animate-none"
       )}
     >

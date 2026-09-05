@@ -1,42 +1,71 @@
-.panel-toolbar {
+/* Fuera de edicion el panel solo muestra el lapiz: el aviso permanente ocupaba
+   una franja entera del dashboard para explicar algo que se descubre al usarlo. */
+.panel-barra-edicion {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  border: 1px solid var(--border);
-  border-radius: 1rem;
-  background: var(--card);
-  padding: 0.8rem;
-  color: var(--foreground);
-  box-shadow: 0 2px 8px -2px rgb(18 20 22 / 8%);
-}
-
-.panel-toolbar-activa {
-  border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
+  gap: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--primary) 45%, var(--border));
+  border-radius: 999px;
   background: color-mix(in srgb, var(--primary) 6%, var(--card));
+  padding: 0.35rem 0.4rem 0.35rem 0.85rem;
+  box-shadow: 0 1px 2px rgb(18 20 22 / 5%);
 }
 
-.panel-toolbar-titulo {
+.panel-barra-edicion-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
   font-size: 0.8125rem;
   font-weight: 600;
 }
 
-.panel-toolbar-activa .panel-toolbar-titulo::before {
-  display: inline-block;
+.panel-barra-edicion-estado::before {
   width: 0.5rem;
   height: 0.5rem;
-  margin-right: 0.5rem;
   border-radius: 999px;
   background: var(--primary);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 22%, transparent);
   content: '';
 }
 
-.panel-toolbar-copy {
-  margin-top: 0.125rem;
+.panel-barra-edicion-copy {
   color: var(--muted-foreground);
   font-size: 0.75rem;
-  line-height: 1.35;
+}
+
+@media (max-width: 1100px) {
+  .panel-barra-edicion-copy {
+    display: none;
+  }
+}
+
+.panel-widget-quitar {
+  position: absolute;
+  z-index: 32;
+  top: -0.55rem;
+  left: -0.55rem;
+  display: grid;
+  width: 1.5rem;
+  height: 1.5rem;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--destructive) 35%, transparent);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--destructive);
+  box-shadow: 0 2px 8px rgb(18 20 22 / 18%);
+  cursor: pointer;
+  transition: background-color 140ms ease, transform 140ms ease;
+}
+
+.panel-widget-quitar:hover {
+  background: color-mix(in srgb, var(--destructive) 12%, var(--card));
+  transform: scale(1.08);
+}
+
+.panel-widget-quitar:focus-visible {
+  outline: 2px solid var(--destructive);
+  outline-offset: 2px;
 }
 
 .panel-widget-grid-editando {
@@ -145,6 +174,3 @@
   line-height: 1;
 }
 
-@media (max-width: 640px) {
-  .panel-toolbar { align-items: flex-start; }
-}

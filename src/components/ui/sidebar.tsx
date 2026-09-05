@@ -173,7 +173,7 @@ function EnlaceNav({
       <TooltipContent
         side="right"
         sideOffset={10}
-        className="bg-sidebar-accent text-sidebar-accent-foreground ring-black/10 shadow-[0_8px_24px_rgb(0_0_0_/_0.35)]"
+        className="bg-sidebar-accent text-sidebar-accent-foreground ring-black/[0.06] shadow-[0_2px_6px_rgb(0_0_0_/_0.18),0_10px_24px_-12px_rgb(0_0_0_/_0.4)]"
       >
         {item.etiqueta}
         {item.badge !== undefined && (

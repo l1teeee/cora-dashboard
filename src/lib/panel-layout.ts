@@ -1,5 +1,8 @@
-import { moveElement, verticalCompactor } from 'react-grid-layout'
-import type { Layout, LayoutItem } from 'react-grid-layout'
+// El subpath /core expone la matematica de la rejilla sin arrastrar React ni el
+// DOM: entrando por la raiz del paquete, este modulo de dominio terminaria
+// dependiendo del arbol de componentes.
+import { moveElement, verticalCompactor } from 'react-grid-layout/core'
+import type { Layout, LayoutItem } from 'react-grid-layout/core'
 
 export const PANEL_COLUMNAS = 12
 export const PANEL_ALTO_FILA = 24
@@ -12,23 +15,37 @@ export const PANEL_ANCHO_MINIMO_ESCRITORIO = 900
 export type DefinicionPanel = {
   clave: string
   etiquetas: Record<string, string>
+  // Catalogo completo: cada widget que el panel sabe dibujar, con su geometria.
   layout: Layout
+  // Los que se ven sin personalizar. El resto existe pero solo aparece en
+  // "Agregar", para no cargar de golpe todas las graficas posibles.
+  visiblesPorDefecto: string[]
 }
 
 export type AccionLayout =
   | { type: 'move'; dx: number; dy: number }
   | { type: 'resize'; dw: number; dh: number }
 
+// v2: los items dejaron de ser el catalogo completo. Los widgets que el usuario
+// quita simplemente no se guardan, asi que la lista de items tambien define cuales
+// estan visibles.
 type LayoutGuardado = {
-  version: 1
+  version: 2
   items: Array<Pick<LayoutItem, 'i' | 'x' | 'y' | 'w' | 'h'>>
 }
 
 type AlmacenLectura = Pick<Storage, 'getItem'>
 type AlmacenEscritura = Pick<Storage, 'setItem' | 'removeItem'>
 
-const clonarPorDefecto = (panel: DefinicionPanel): LayoutItem[] =>
-  panel.layout.map((item) => ({ ...item }))
+// Las coordenadas del catalogo asumen que estan todos los widgets, asi que al
+// quedarse solo con los visibles hay que compactar o el panel abre con huecos.
+const clonarPorDefecto = (panel: DefinicionPanel): LayoutItem[] => {
+  const visibles = panel.layout
+    .filter((item) => panel.visiblesPorDefecto.includes(item.i))
+    .map((item) => ({ ...item }))
+
+  return verticalCompactor.compact(visibles, PANEL_COLUMNAS).map((item) => ({ ...item }))
+}
 
 const esEnteroFinito = (valor: unknown): valor is number =>
   typeof valor === 'number' && Number.isFinite(valor) && Number.isInteger(valor)
@@ -40,13 +57,17 @@ function restaurarConLimites(
   panel: DefinicionPanel,
   items: LayoutGuardado['items']
 ): LayoutItem[] | null {
-  if (items.length !== panel.layout.length) return null
+  if (items.length > panel.layout.length) return null
 
   const restaurado: LayoutItem[] = []
+  const vistos = new Set<string>()
 
-  for (const defecto of panel.layout) {
-    const item = items.find((candidato) => candidato.i === defecto.i)
-    if (!item) return null
+  for (const item of items) {
+    if (vistos.has(item.i)) return null
+    vistos.add(item.i)
+
+    const defecto = panel.layout.find((candidato) => candidato.i === item.i)
+    if (!defecto) return null
 
     const valoresValidos = [item.x, item.y, item.w, item.h].every(esEnteroFinito)
     if (!valoresValidos || item.x < 0 || item.y < 0 || item.y > 200 || item.w < 1 || item.h < 1) {
@@ -82,7 +103,7 @@ export function cargarLayout(panel: DefinicionPanel, almacen?: AlmacenLectura): 
     if (!crudo) return clonarPorDefecto(panel)
 
     const parseado = JSON.parse(crudo) as Partial<LayoutGuardado>
-    if (parseado.version !== 1 || !Array.isArray(parseado.items)) return clonarPorDefecto(panel)
+    if (parseado.version !== 2 || !Array.isArray(parseado.items)) return clonarPorDefecto(panel)
 
     return restaurarConLimites(panel, parseado.items as LayoutGuardado['items'])
       ?? clonarPorDefecto(panel)
@@ -99,7 +120,7 @@ export function guardarLayout(
   if (!almacen) return
 
   const payload: LayoutGuardado = {
-    version: 1,
+    version: 2,
     items: layout.map(({ i, x, y, w, h }) => ({ i, x, y, w, h })),
   }
 
@@ -111,14 +132,17 @@ export function guardarLayout(
 }
 
 export function esLayoutPorDefecto(panel: DefinicionPanel, layout: Layout): boolean {
-  return panel.layout.every((defecto) => {
-    const item = layout.find((candidato) => candidato.i === defecto.i)
+  const defecto = clonarPorDefecto(panel)
+  if (layout.length !== defecto.length) return false
+
+  return defecto.every((esperado) => {
+    const item = layout.find((candidato) => candidato.i === esperado.i)
     return Boolean(
       item &&
-        item.x === defecto.x &&
-        item.y === defecto.y &&
-        item.w === defecto.w &&
-        item.h === defecto.h
+        item.x === esperado.x &&
+        item.y === esperado.y &&
+        item.w === esperado.w &&
+        item.h === esperado.h
     )
   })
 }
@@ -167,11 +191,41 @@ export function actualizarLayout(
   return verticalCompactor.compact(clonado, PANEL_COLUMNAS).map((candidato) => ({ ...candidato }))
 }
 
+export function widgetsOcultos(panel: DefinicionPanel, layout: Layout): string[] {
+  const visibles = new Set(layout.map((item) => item.i))
+  return panel.layout.filter((defecto) => !visibles.has(defecto.i)).map((defecto) => defecto.i)
+}
+
+export function quitarWidget(layout: Layout, widgetId: string): LayoutItem[] {
+  const restantes = layout
+    .filter((item) => item.i !== widgetId)
+    .map((item) => ({ ...item }))
+
+  return verticalCompactor.compact(restantes, PANEL_COLUMNAS).map((item) => ({ ...item }))
+}
+
+export function agregarWidget(
+  panel: DefinicionPanel,
+  layout: Layout,
+  widgetId: string
+): LayoutItem[] {
+  const clonado = layout.map((item) => ({ ...item }))
+  if (clonado.some((item) => item.i === widgetId)) return clonado
+
+  const defecto = panel.layout.find((item) => item.i === widgetId)
+  if (!defecto) return clonado
+
+  // Entra debajo de todo lo demas para no desplazar lo que el usuario ya coloco.
+  const primeraFilaLibre = clonado.reduce((maximo, item) => Math.max(maximo, item.y + item.h), 0)
+  clonado.push({ ...defecto, x: 0, y: primeraFilaLibre })
+
+  return verticalCompactor.compact(clonado, PANEL_COLUMNAS).map((item) => ({ ...item }))
+}
+
 export const PANEL_ADMIN: DefinicionPanel = {
-  // v2: las tarjetas de cifra pasaron de 4 a 5 filas. Con 4 no cabia la grafica y quedaba
-  // recortada contra el borde inferior, asi que un layout guardado con la altura vieja
-  // reproduciria el mismo defecto; subir la version lo descarta y aplica el nuevo default.
-  clave: 'cora-dashboard:layout-admin:v2',
+  // v3: el formato guardado paso a admitir subconjuntos de widgets. Un layout v2 no
+  // distingue "widget quitado" de "widget faltante", asi que se descarta al cargar.
+  clave: 'cora-dashboard:layout-admin:v3',
   etiquetas: {
     total: 'Total de llamadas',
     exito: 'Tasa de exito',
@@ -184,7 +238,24 @@ export const PANEL_ADMIN: DefinicionPanel = {
     carga: 'Carga por asesor',
     finalizacion: 'Finalizacion de llamadas',
     ultimas: 'Ultimas llamadas',
+    tendencia: 'Llamadas por dia',
+    'costo-dia': 'Costo por dia',
+    'duracion-rangos': 'Duracion por rangos',
+    'dia-semana': 'Llamadas por dia de la semana',
   },
+  visiblesPorDefecto: [
+    'total',
+    'exito',
+    'duracion',
+    'costo',
+    'transferencias',
+    'sin-asignar',
+    'recurrentes',
+    'por-hora',
+    'carga',
+    'finalizacion',
+    'ultimas',
+  ],
   // Los minimos dejan al menos dos pasos de reduccion desde la vista inicial, para
   // que cada tarjeta se pueda ensanchar, estrechar, alargar y acortar de verdad.
   layout: [
@@ -199,11 +270,15 @@ export const PANEL_ADMIN: DefinicionPanel = {
     { i: 'carga', x: 8, y: 10, w: 4, h: 10, minW: 3, minH: 7, maxW: 12, maxH: 20 },
     { i: 'finalizacion', x: 0, y: 20, w: 12, h: 12, minW: 4, minH: 7, maxW: 12, maxH: 24 },
     { i: 'ultimas', x: 0, y: 32, w: 12, h: 13, minW: 4, minH: 7, maxW: 12, maxH: 26 },
+    { i: 'tendencia', x: 0, y: 45, w: 6, h: 10, minW: 4, minH: 7, maxW: 12, maxH: 20 },
+    { i: 'costo-dia', x: 6, y: 45, w: 6, h: 10, minW: 4, minH: 7, maxW: 12, maxH: 20 },
+    { i: 'duracion-rangos', x: 0, y: 55, w: 6, h: 10, minW: 4, minH: 7, maxW: 12, maxH: 20 },
+    { i: 'dia-semana', x: 6, y: 55, w: 6, h: 10, minW: 4, minH: 7, maxW: 12, maxH: 20 },
   ],
 }
 
 export const PANEL_AGENTE: DefinicionPanel = {
-  clave: 'cora-dashboard:layout-agente:v2',
+  clave: 'cora-dashboard:layout-agente:v3',
   etiquetas: {
     mias: 'Mis llamadas',
     seguimiento: 'Pendientes de seguimiento',
@@ -214,6 +289,16 @@ export const PANEL_AGENTE: DefinicionPanel = {
     pendientes: 'Llamadas pendientes de seguimiento',
     recientes: 'Mis llamadas recientes',
   },
+  visiblesPorDefecto: [
+    'mias',
+    'seguimiento',
+    'quejas',
+    'sin-resumen',
+    'personas',
+    'duracion',
+    'pendientes',
+    'recientes',
+  ],
   layout: [
     { i: 'mias', x: 0, y: 0, w: 6, h: 5, minW: 3, minH: 4, maxW: 12, maxH: 12 },
     { i: 'seguimiento', x: 6, y: 0, w: 6, h: 5, minW: 3, minH: 4, maxW: 12, maxH: 12 },

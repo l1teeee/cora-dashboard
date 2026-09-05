@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   ClockIcon,
   FlagIcon,
+  FlagOffIcon,
   HourglassIcon,
   MessageSquareWarningIcon,
   PhoneCallIcon,
@@ -16,7 +17,6 @@ import { TablaLlamadas } from "@/components/tabla-llamadas";
 import { PANEL_AGENTE } from "@/lib/panel-layout";
 import { formatearDuracion, formatearFecha } from "@/lib/metricas";
 import type { Llamada, MetricasAgente, Rol } from "@/lib/tipos";
-import { FlagOffIcon } from "lucide-react";
 
 export function PanelAgente({
   metricas,
@@ -109,6 +109,16 @@ export function PanelAgente({
         <TarjetaWidget
           titulo="Pendientes de seguimiento"
           descripcion="Estas personas esperan que les devuelvas la llamada"
+          accion={
+            <Button
+              variant="outline"
+              size="sm"
+              nativeButton={false}
+              render={<Link href="/dashboard/llamadas" />}
+            >
+              Ver todas
+            </Button>
+          }
         >
           {pendientes.length === 0 ? (
             <EmptyState

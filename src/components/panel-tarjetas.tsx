@@ -1,21 +1,25 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { KeyboardEvent, ReactNode, Ref } from "react";
-import { CheckIcon, PencilIcon, RotateCcwIcon } from "lucide-react";
+import type { KeyboardEvent, Ref } from "react";
 import { GridLayout, useContainerWidth } from "react-grid-layout";
 import type { Layout, LayoutItem, ResizeHandleAxis } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import "./panel-widgets.css";
 
-import { Button } from "@/components/ui/button";
+import { WidgetTarjeta } from "@/components/panel-tarjetas/widget-tarjeta";
+import type { Widget } from "@/components/panel-tarjetas/tipos";
+import { BarraPersonalizacion } from "@/components/panel-tarjetas/barra-personalizacion";
 import {
   actualizarLayout,
+  agregarWidget,
   cargarLayout,
   esLayoutPorDefecto,
   guardarLayout,
+  quitarWidget,
   restablecerLayout,
+  widgetsOcultos,
   PANEL_ALTO_FILA,
   PANEL_ANCHO_MINIMO_ESCRITORIO,
   PANEL_COLUMNAS,
@@ -23,12 +27,7 @@ import {
   type DefinicionPanel,
 } from "@/lib/panel-layout";
 
-export type Widget = {
-  id: string;
-  contenido: ReactNode;
-  // Solo en la vista apilada de movil: los widgets anchos ocupan las dos columnas.
-  anchoEnMovil?: boolean;
-};
+export type { Widget };
 
 const configuracionGrid = {
   cols: PANEL_COLUMNAS,
@@ -77,6 +76,14 @@ export function PanelTarjetas({
 
   const esEscritorio = mounted && width >= PANEL_ANCHO_MINIMO_ESCRITORIO;
   const hayLayoutPropio = !esLayoutPorDefecto(panel, layout);
+  const ocultos = widgetsOcultos(panel, layout);
+
+  const visibles = useMemo(() => {
+    const posicion = new Map(layout.map((item, indice) => [item.i, indice]));
+    return widgets
+      .filter((widget) => posicion.has(widget.id))
+      .sort((a, b) => (posicion.get(a.id) ?? 0) - (posicion.get(b.id) ?? 0));
+  }, [layout, widgets]);
 
   // localStorage no existe en el render del servidor: se lee tras el montaje para
   // no romper la hidratacion.
@@ -134,51 +141,44 @@ export function PanelTarjetas({
     [editando, layout, panel.etiquetas, persistirLayout]
   );
 
+  const quitar = useCallback(
+    (widgetId: string) => {
+      persistirLayout(quitarWidget(layout, widgetId));
+      setSeleccionado((actual) => (actual === widgetId ? null : actual));
+      setAnuncio(`${panel.etiquetas[widgetId] ?? widgetId} se quito del panel.`);
+    },
+    [layout, panel.etiquetas, persistirLayout]
+  );
+
+  const agregar = useCallback(
+    (widgetId: string) => {
+      persistirLayout(agregarWidget(panel, layout, widgetId));
+      setSeleccionado(widgetId);
+      setAnuncio(`${panel.etiquetas[widgetId] ?? widgetId} se agrego al final del panel.`);
+    },
+    [layout, panel, persistirLayout]
+  );
+
   const hijos = useMemo(
     () =>
-      widgets.map((widget) => (
-        <div
-          key={widget.id}
-          data-widget-id={widget.id}
-          className={`panel-widget-frame group relative h-full ${editando ? "panel-widget-frame-editando" : ""} ${seleccionado === widget.id ? "panel-widget-frame-seleccionado" : ""}`}
-          onPointerDown={() => {
-            if (editando) setSeleccionado(widget.id);
-          }}
-          onFocus={() => {
-            if (editando) setSeleccionado(widget.id);
-          }}
-          onKeyDown={(evento) => alTeclear(widget.id, evento)}
-          tabIndex={editando ? 0 : -1}
-          role={editando ? "group" : "region"}
-          aria-label={
-            editando
-              ? `Editar ${panel.etiquetas[widget.id] ?? widget.id}`
-              : (panel.etiquetas[widget.id] ?? widget.id)
-          }
-          aria-describedby={editando ? `${panel.clave}-ayuda` : undefined}
-          aria-keyshortcuts={
-            editando
-              ? "ArrowLeft ArrowRight ArrowUp ArrowDown Shift+ArrowLeft Shift+ArrowRight Shift+ArrowUp Shift+ArrowDown"
-              : undefined
-          }
-        >
-          {editando && seleccionado === widget.id && (
-            <span className="panel-widget-medida" aria-live="polite">
-              Ancho {layout.find((item) => item.i === widget.id)?.w}
-              {" · "}
-              Alto {layout.find((item) => item.i === widget.id)?.h}
-            </span>
-          )}
-          <div
-            className="panel-widget-contenido h-full overflow-hidden [&>*]:h-full [&>*]:w-full"
-            inert={editando}
-            aria-hidden={editando || undefined}
-          >
-            {widget.contenido}
-          </div>
-        </div>
-      )),
-    [alTeclear, editando, layout, panel.clave, panel.etiquetas, seleccionado, widgets]
+      visibles.map((widget) => {
+        const item = layout.find((elemento) => elemento.i === widget.id);
+        return (
+          <WidgetTarjeta
+            key={widget.id}
+            widget={widget}
+            etiqueta={panel.etiquetas[widget.id] ?? widget.id}
+            editando={editando}
+            seleccionado={seleccionado === widget.id}
+            medida={item ? { ancho: item.w, alto: item.h } : undefined}
+            idAyuda={`${panel.clave}-ayuda`}
+            onSeleccionar={() => setSeleccionado(widget.id)}
+            onQuitar={() => quitar(widget.id)}
+            onTeclear={(evento) => alTeclear(widget.id, evento)}
+          />
+        );
+      }),
+    [alTeclear, editando, layout, panel.clave, panel.etiquetas, quitar, seleccionado, visibles]
   );
 
   function restablecer() {
@@ -189,9 +189,9 @@ export function PanelTarjetas({
   function entrarAEdicion() {
     if (!esEscritorio) return;
     setEditando(true);
-    setSeleccionado(widgets[0]?.id ?? null);
+    setSeleccionado(visibles[0]?.id ?? null);
     setAnuncio(
-      "Edicion activa. Arrastra una tarjeta o usa los puntos laterales para cambiar su tamano."
+      "Edicion activa. Arrastra una tarjeta para moverla, usa los puntos laterales para cambiar su tamano o la X para quitarla."
     );
   }
 
@@ -203,54 +203,18 @@ export function PanelTarjetas({
 
   return (
     <div className="space-y-4">
-      <div className={`panel-toolbar ${editando ? "panel-toolbar-activa" : ""}`}>
-        <div className="min-w-0">
-          <p className="panel-toolbar-titulo">
-            {editando ? "Edicion activa" : "Distribucion personalizable"}
-          </p>
-          <p id={`${panel.clave}-ayuda`} className="panel-toolbar-copy">
-            {esEscritorio
-              ? editando
-                ? "Arrastra cualquier parte de una tarjeta para moverla. Usa los cuatro puntos laterales para cambiar ancho o alto."
-                : "Personaliza el espacio de trabajo cuando lo necesites. Tus cambios se guardan automaticamente."
-              : "En pantallas pequenas los widgets se muestran apilados. La personalizacion esta disponible en escritorio."}
-          </p>
-        </div>
-        <div className="flex shrink-0 flex-wrap items-center gap-2">
-          {editando ? (
-            <>
-              <Button
-                variant="ghost"
-                size="sm"
-                disabled={!hayLayoutPropio}
-                onClick={restablecer}
-              >
-                <RotateCcwIcon strokeWidth={1.75} />
-                Restablecer
-              </Button>
-              <Button size="sm" onClick={terminarEdicion}>
-                <CheckIcon strokeWidth={1.75} />
-                Listo
-              </Button>
-            </>
-          ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={!esEscritorio}
-              onClick={entrarAEdicion}
-              title={
-                esEscritorio
-                  ? "Editar la distribucion de widgets"
-                  : "Disponible en escritorio"
-              }
-            >
-              <PencilIcon strokeWidth={1.75} />
-              Personalizar
-            </Button>
-          )}
-        </div>
-      </div>
+      <BarraPersonalizacion
+        editando={editando}
+        esEscritorio={esEscritorio}
+        ocultos={ocultos}
+        etiquetas={panel.etiquetas}
+        hayLayoutPropio={hayLayoutPropio}
+        idAyuda={`${panel.clave}-ayuda`}
+        onAgregar={agregar}
+        onRestablecer={restablecer}
+        onTerminar={terminarEdicion}
+        onEntrarAEdicion={entrarAEdicion}
+      />
 
       <p className="sr-only" role="status" aria-live="polite">
         {anuncio}
@@ -266,7 +230,7 @@ export function PanelTarjetas({
               enabled: editando,
               bounded: true,
               threshold: 8,
-              cancel: ".panel-resize-handle",
+              cancel: ".panel-resize-handle,.panel-widget-quitar",
             }}
             resizeConfig={{
               enabled: editando,
@@ -301,7 +265,7 @@ export function PanelTarjetas({
           </GridLayout>
         ) : (
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            {widgets.map((widget) => (
+            {visibles.map((widget) => (
               <div
                 key={widget.id}
                 data-widget-id={widget.id}

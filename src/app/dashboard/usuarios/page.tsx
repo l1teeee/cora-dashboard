@@ -35,7 +35,7 @@ export default async function Page() {
       />
 
       {error ? (
-        <div className="rounded-3xl bg-card p-4 shadow-sm ring-1 ring-border sm:p-6">
+        <div className="superficie p-4 sm:p-6">
           <Alert variant="destructive" titulo="No se pudo conectar con el backend de CORA">
             {error}
           </Alert>

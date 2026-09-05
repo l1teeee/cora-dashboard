@@ -32,7 +32,7 @@ export function Recepcion() {
 
   return (
     <div className="space-y-5 sm:space-y-6">
-      <div className="rounded-3xl bg-card p-5 shadow-sm ring-1 ring-border">
+      <div className="superficie p-5">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <SelectorEstado estado={estado} onCambiar={cambiarEstado} />
 

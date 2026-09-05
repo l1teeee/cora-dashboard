@@ -13,52 +13,27 @@ import { Button } from "@/components/ui/button";
 import { PanelTarjetas, type Widget } from "@/components/panel-tarjetas";
 import { TarjetaWidget } from "@/components/tarjeta-widget";
 import { BarrasFinalizacion } from "@/components/barras-finalizacion";
-import { LlamadasPorHora } from "@/components/llamadas-por-hora";
 import { CargaAgentes } from "@/components/carga-agentes";
 import { TablaLlamadas } from "@/components/tabla-llamadas";
+import {
+  CostoPorDia,
+  DuracionPorRangos,
+  LlamadasPorDia,
+  LlamadasPorDiaSemana,
+  LlamadasPorHora,
+} from "@/components/graficas/diferidas";
 import { PANEL_ADMIN } from "@/lib/panel-layout";
 import {
+  costoPorDia,
+  desgloseFinalizacion,
+  duracionPorRangos,
   formatearCosto,
   formatearDuracion,
+  llamadasPorDia,
+  llamadasPorDiaSemana,
   llamadasPorHora,
 } from "@/lib/metricas";
 import type { Llamada, Metricas, MetricasOperacion, Rol } from "@/lib/tipos";
-
-function serieUltimos14Dias(llamadas: Llamada[]): number[] {
-  const claves: string[] = [];
-  const hoy = new Date();
-
-  for (let diasAtras = 13; diasAtras >= 0; diasAtras--) {
-    const fecha = new Date(hoy);
-    fecha.setDate(hoy.getDate() - diasAtras);
-
-    const anio = fecha.getFullYear();
-    const mes = String(fecha.getMonth() + 1).padStart(2, "0");
-    const dia = String(fecha.getDate()).padStart(2, "0");
-    claves.push(`${anio}-${mes}-${dia}`);
-  }
-
-  return claves.map(
-    (clave) => llamadas.filter((l) => l.fecha?.slice(0, 10) === clave).length
-  );
-}
-
-function desgloseFinalizacion(llamadas: Llamada[]) {
-  const conteos = new Map<string, number>();
-
-  for (const llamada of llamadas) {
-    const razon = llamada.razon_finalizacion ?? "Sin dato";
-    conteos.set(razon, (conteos.get(razon) ?? 0) + 1);
-  }
-
-  const filas: { razon: string; cantidad: number }[] = [];
-  for (const [razon, cantidad] of conteos) {
-    filas.push({ razon, cantidad });
-  }
-  filas.sort((a, b) => b.cantidad - a.cantidad);
-
-  return filas;
-}
 
 export function PanelAdmin({
   metricas,
@@ -75,8 +50,13 @@ export function PanelAdmin({
   asignables: { id: string; nombre: string }[];
   rol: Rol;
 }) {
-  const serieLlamadas = serieUltimos14Dias(llamadas);
-  const hayDatosEnSerie = serieLlamadas.some((valor) => valor > 0);
+  const serieLlamadas = llamadasPorDia(llamadas, 14);
+  const hayDatosEnSerie = serieLlamadas.some((punto) => punto.valor > 0);
+  const conteosPorHora = llamadasPorHora(llamadas);
+  const filasFinalizacion = desgloseFinalizacion(llamadas);
+  const serieCostoPorDia = costoPorDia(llamadas, 14);
+  const rangosDuracion = duracionPorRangos(llamadas);
+  const serieDiaSemana = llamadasPorDiaSemana(llamadas);
 
   const widgets: Widget[] = [
     {
@@ -166,7 +146,7 @@ export function PanelAdmin({
           titulo="Llamadas por hora"
           descripcion="En que franjas entra el volumen, para dimensionar los turnos"
         >
-          <LlamadasPorHora conteos={llamadasPorHora(llamadas)} />
+          <LlamadasPorHora conteos={conteosPorHora} />
         </TarjetaWidget>
       ),
     },
@@ -176,6 +156,16 @@ export function PanelAdmin({
         <TarjetaWidget
           titulo="Carga por asesor"
           descripcion="Llamadas asignadas a cada agente activo"
+          accion={
+            <Button
+              variant="outline"
+              size="sm"
+              nativeButton={false}
+              render={<Link href="/dashboard/usuarios" />}
+            >
+              Ver asesores
+            </Button>
+          }
         >
           <CargaAgentes agentes={carga} sinAsignar={operacion.sinAsignar} />
         </TarjetaWidget>
@@ -188,9 +178,19 @@ export function PanelAdmin({
         <TarjetaWidget
           titulo="Finalizacion de llamadas"
           descripcion="Como termino cada llamada. Los slugs son los de Vapi; entre parentesis, que significan."
+          accion={
+            <Button
+              variant="outline"
+              size="sm"
+              nativeButton={false}
+              render={<Link href="/dashboard/llamadas" />}
+            >
+              Ver llamadas
+            </Button>
+          }
         >
           <BarrasFinalizacion
-            filas={desgloseFinalizacion(llamadas)}
+            filas={filasFinalizacion}
             total={llamadas.length}
           />
         </TarjetaWidget>
@@ -218,6 +218,54 @@ export function PanelAdmin({
             rol={rol}
             asignables={asignables}
           />
+        </TarjetaWidget>
+      ),
+    },
+    {
+      id: "tendencia",
+      anchoEnMovil: true,
+      contenido: (
+        <TarjetaWidget
+          titulo="Llamadas por dia"
+          descripcion="Volumen diario de los ultimos 14 dias"
+        >
+          <LlamadasPorDia datos={serieLlamadas} />
+        </TarjetaWidget>
+      ),
+    },
+    {
+      id: "costo-dia",
+      anchoEnMovil: true,
+      contenido: (
+        <TarjetaWidget
+          titulo="Costo por dia"
+          descripcion="Cuanto cuesta la operacion cada dia"
+        >
+          <CostoPorDia datos={serieCostoPorDia} />
+        </TarjetaWidget>
+      ),
+    },
+    {
+      id: "duracion-rangos",
+      anchoEnMovil: true,
+      contenido: (
+        <TarjetaWidget
+          titulo="Duracion por rangos"
+          descripcion="Cuantas llamadas caen en cada tramo de duracion"
+        >
+          <DuracionPorRangos datos={rangosDuracion} />
+        </TarjetaWidget>
+      ),
+    },
+    {
+      id: "dia-semana",
+      anchoEnMovil: true,
+      contenido: (
+        <TarjetaWidget
+          titulo="Llamadas por dia de la semana"
+          descripcion="Que dias concentran el volumen"
+        >
+          <LlamadasPorDiaSemana datos={serieDiaSemana} />
         </TarjetaWidget>
       ),
     },

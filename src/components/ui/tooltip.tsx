@@ -28,10 +28,17 @@ function TooltipContent({
         <TooltipPrimitive.Popup
           data-slot="tooltip-content"
           className={cn(
-            "origin-(--transform-origin) rounded-lg bg-popover px-2.5 py-1.5 text-[12px] font-medium whitespace-nowrap text-popover-foreground shadow-[0_10px_28px_rgb(18_20_22_/_0.22)] ring-1 ring-border outline-none",
-            "transition-[transform,opacity] duration-100 ease-out",
-            "data-starting-style:scale-95 data-starting-style:opacity-0",
-            "data-ending-style:scale-95 data-ending-style:opacity-0",
+            "origin-(--transform-origin) rounded-[0.6rem] bg-popover px-2.5 py-1.5 text-[12px] leading-none font-medium whitespace-nowrap text-popover-foreground outline-none",
+            "shadow-[0_1px_2px_rgb(18_20_22_/_0.08),0_8px_20px_-8px_rgb(18_20_22_/_0.22)] ring-1 ring-border",
+            // La curva de salida suave y los 180ms evitan que aparezca de golpe;
+            // el origen en el gatillo hace que crezca desde el icono.
+            "transition-[transform,opacity,translate] duration-[180ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
+            "data-starting-style:scale-[0.96] data-starting-style:opacity-0",
+            "data-ending-style:scale-[0.96] data-ending-style:opacity-0",
+            "data-[side=right]:data-starting-style:-translate-x-1",
+            "data-[side=left]:data-starting-style:translate-x-1",
+            "data-[side=top]:data-starting-style:translate-y-1",
+            "data-[side=bottom]:data-starting-style:-translate-y-1",
             "data-instant:transition-none",
             className
           )}

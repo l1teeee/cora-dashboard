@@ -241,8 +241,56 @@
     }
   }
 
+  /* Superficie de las tarjetas del dashboard. El anillo gris plano de antes hacia
+     que la rejilla se leyera como una cuadricula de cajas con borde; ahora la
+     separacion la da la elevacion y el canto es un hairline casi invisible. */
   .superficie {
-    @apply rounded-2xl bg-card shadow-[0_2px_8px_-2px_rgb(18_20_22_/_0.08),0_1px_2px_rgb(18_20_22_/_0.04)] ring-1 ring-border;
+    --superficie-canto: 0 0 0 1px color-mix(in oklab, var(--foreground) 5%, transparent);
+    --superficie-elevacion:
+      0 1px 2px rgb(18 20 22 / 4%),
+      0 6px 16px -8px rgb(18 20 22 / 10%),
+      0 18px 36px -22px rgb(18 20 22 / 14%);
+
+    border-radius: var(--radius-2xl);
+    background: var(--card);
+    box-shadow: var(--superficie-canto), var(--superficie-elevacion);
+  }
+
+  /* En oscuro la sombra no se ve contra el fondo, asi que el canto sube de peso. */
+  .dark .superficie {
+    --superficie-canto: 0 0 0 1px color-mix(in oklab, oklch(1 0 0) 9%, transparent);
+    --superficie-elevacion:
+      0 2px 6px rgb(0 0 0 / 24%),
+      0 16px 32px -18px rgb(0 0 0 / 45%);
+  }
+
+  .superficie-interactiva {
+    transition:
+      transform 200ms ease-out,
+      box-shadow 200ms ease-out;
+  }
+
+  .superficie-interactiva:hover {
+    --superficie-canto: 0 0 0 1px color-mix(in oklab, var(--foreground) 7%, transparent);
+    --superficie-elevacion:
+      0 2px 4px rgb(18 20 22 / 5%),
+      0 12px 24px -10px rgb(18 20 22 / 14%),
+      0 28px 48px -24px rgb(18 20 22 / 18%);
+
+    transform: translateY(-2px);
+  }
+
+  .dark .superficie-interactiva:hover {
+    --superficie-canto: 0 0 0 1px color-mix(in oklab, oklch(1 0 0) 13%, transparent);
+    --superficie-elevacion:
+      0 4px 10px rgb(0 0 0 / 30%),
+      0 24px 44px -20px rgb(0 0 0 / 55%);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .superficie-interactiva:hover {
+      transform: none;
+    }
   }
 
   @keyframes fadeSlideIn {

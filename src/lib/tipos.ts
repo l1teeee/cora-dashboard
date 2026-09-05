@@ -49,3 +49,7 @@ export type MetricasOperacion = {
   numerosUnicos: number
   recurrentes: number
 }
+
+export type PuntoGrafica = { etiqueta: string; valor: number }
+
+export type DesgloseFinalizacion = { razon: string; cantidad: number }
